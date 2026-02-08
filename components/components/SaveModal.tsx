@@ -1,8 +1,9 @@
+import { useSaveEntry } from "@/lib/contexts/SaveEntryContext";
+import { useMessages } from "@/lib/hooks/useMessages";
 import React, { useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 import Button from "../Button";
 import TextField from "../TextField";
-import { useMessages } from "@/lib/hooks/useMessages";
 
 interface SaveModalProps {
   showSaveModal: boolean;
@@ -19,7 +20,8 @@ interface SaveModalProps {
 const SaveModal = ({ showSaveModal, setShowSaveModal }: SaveModalProps) => {
   const [title, setTitle] = useState<string>("");
   const [focusArea, setFocusArea] = useState<string>("");
-  const {createMessage} = useMessages()
+  const { createMessage } = useMessages();
+  const { onSave } = useSaveEntry();
 
   const closeModal = () => setShowSaveModal(false);
 
@@ -61,7 +63,10 @@ const SaveModal = ({ showSaveModal, setShowSaveModal }: SaveModalProps) => {
           <View className="items-center mt-8">
             <Button
               text="Save"
-              onPress={closeModal}
+              onPress={() => {
+                onSave();
+                closeModal();
+              }}
               size="md"
             />
           </View>

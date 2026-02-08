@@ -1,4 +1,6 @@
 import { colors } from "@/constants/colors";
+import { useSaveEntry } from "@/lib/contexts/SaveEntryContext";
+import { useMessages } from "@/lib/hooks/useMessages";
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import {
@@ -9,8 +11,14 @@ import {
 
 const WriteEntry = () => {
   const richText = useRef<RichEditor>(null);
+  const { setOnSave } = useSaveEntry();
+  const { createMessage } = useMessages();
 
   useEffect(() => {
+    setOnSave(() => {
+      // createMessage()
+    });
+
     // Focus the editor when component mounts
     const timer = setTimeout(() => {
       richText.current?.focusContentEditor();

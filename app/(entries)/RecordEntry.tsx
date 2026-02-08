@@ -1,5 +1,6 @@
 import AudioWaveformView from "@/components/Recording/AudioWaveformView";
 import { icons } from "@/constants/icons";
+import { useSaveEntry } from "@/lib/contexts/SaveEntryContext";
 import useAudioRecorderHook from "@/lib/hooks/useAudioRecorderHook";
 import React, { useEffect, useRef, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
@@ -7,6 +8,7 @@ import { Image, Pressable, Text, View } from "react-native";
 const RecordEntry = () => {
   const [recordTimer, setRecordTimer] = useState<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { setOnSave } = useSaveEntry();
   const {
     recordingInProgress,
     currentDecibel,
@@ -15,6 +17,13 @@ const RecordEntry = () => {
     waveformHeights,
     resetWaveform,
   } = useAudioRecorderHook();
+
+  useEffect(() => {
+    setOnSave(() => {
+      // createMessage()
+      // Upload voice
+    });
+  }, []);
 
   // Manage interval based on isRecording state
   useEffect(() => {

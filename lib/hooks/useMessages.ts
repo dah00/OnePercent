@@ -4,7 +4,6 @@ import type {
   MessagePayload,
   MessageResponse,
   MessageStatsResponse,
-  ScheduleUpdate,
 } from "@/lib/api";
 import {
   createMessage,
@@ -19,7 +18,7 @@ import { useCallback, useEffect, useState } from "react";
 export function useMessages() {
   const [messages, setMessages] = useState<MessageResponse[]>([]);
   const [upcomingMessages, setUpcomingMessages] = useState<MessageResponse[]>(
-    []
+    [],
   );
   const [isLoadingUpcoming, setIsLoadingUpcoming] = useState<boolean>(false);
   const [stats, setStats] = useState<MessageStatsResponse | null>(null);
@@ -113,15 +112,15 @@ export function useMessages() {
 
   const updateMessageHandler = async (
     id: number,
-    payload: Partial<MessagePayload>
+    payload: Partial<MessagePayload>,
   ) => {
     const response = await updateMessage(id, payload);
     if (response.success && response.data) {
       setMessages((prev) =>
-        prev.map((message) => (message.id === id ? response.data! : message))
+        prev.map((message) => (message.id === id ? response.data! : message)),
       );
       setUpcomingMessages((prev) =>
-        prev.map((message) => (message.id === id ? response.data! : message))
+        prev.map((message) => (message.id === id ? response.data! : message)),
       );
 
       await loadStats();
@@ -135,13 +134,12 @@ export function useMessages() {
     return { success: false, error: errorMsg };
   };
 
-
   const deleteMessageHandler = async (id: number) => {
     const response = await deleteMessage(id);
     if (response.success) {
       setMessages((prev) => prev.filter((message) => message.id !== id));
       setUpcomingMessages((prev) =>
-        prev.filter((message) => message.id !== id)
+        prev.filter((message) => message.id !== id),
       );
 
       await loadStats();

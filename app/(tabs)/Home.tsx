@@ -28,8 +28,6 @@ const Home = () => {
     error,
     reload,
     createMessage,
-    upcomingMessages,
-    isLoadingUpcoming,
   } = useMessages();
 
   return (
@@ -113,17 +111,17 @@ const Home = () => {
             <Streak />
           </View>
 
-          {/* * Upcoming Messages */}
+          {/* Messages list (optional - uncomment to show) */}
           {/* <View className="mt-6 mb-10 px-6">
             <View className="flex-row justify-between items-center">
-              <Text className="text-2xl">Upcoming Messages</Text>
+              <Text className="text-2xl">My entries</Text>
               <Pressable onPress={reload}>
                 <Text className="text-accent text-sm">Refresh</Text>
               </Pressable>
             </View>
 
             <View className="bg-primary rounded-lg mt-4">
-              {isLoadingUpcoming ? (
+              {isLoading ? (
                 <View className="p-4">
                   <Text>Loading messages…</Text>
                 </View>
@@ -134,7 +132,7 @@ const Home = () => {
                   </Text>
                 </View>
               ) : (
-                <MessageList messages={upcomingMessages} />
+                <MessageList messages={messages} />
               )}
             </View>
           </View> */}

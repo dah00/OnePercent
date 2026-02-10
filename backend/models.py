@@ -18,7 +18,6 @@ class Message(Base):
     title = Column(String(255), nullable=True)
     content = Column(Text, nullable=True)  # text message body or voice transcript
     message_type = Column(Enum(MessageType), nullable=False, default=MessageType.TEXT)
-    scheduled_date = Column(DateTime(timezone=True), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False) 
     user = relationship("User", back_populates="messages")
     created_at = Column(DateTime(timezone=True), server_default=func.now())

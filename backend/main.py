@@ -14,7 +14,7 @@ from database import Base, engine, get_db
 from models import Message, User
 from schemas import (
     MessageCreate, MessageUpdate, MessageResponse,
-    UserCreate, UserResponse, Token, TokenData, ScheduleUpdate, MessageType,
+    UserCreate, UserResponse, Token, TokenData, MessageType,
 )
 from security import (
     verify_password, get_password_hash,
@@ -116,7 +116,6 @@ def create_message(
             user_id=current_user.id, 
             title=title, content=data["content"], 
             message_type=data["message_type"], 
-            scheduled_date=data["scheduled_date"], 
             focus_area=focus_area
             )
         db.add(db_message)
@@ -148,33 +147,7 @@ def list_messages(
         )
 
 
-# IMPORTANT: Specific routes must come BEFORE parameterized routes!
-# FastAPI matches routes in order, so /upcoming and /stats must come before /{message_id}
-@app.get("/api/messages/upcoming", response_model=List[MessageResponse])
-def get_upcoming_messages(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Get messages scheduled for future dates.
-    Only returns messages where scheduled_date is in the future.
-    """
-    try:
-        
-        now = datetime.now(timezone.utc)
-        messages = db.query(Message).filter(
-            Message.user_id == current_user.id,
-            Message.scheduled_date > now  
-        ).order_by(Message.scheduled_date.asc()).all() 
-        
-        return messages
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch upcoming messages: {str(e)}"
-        )
-
-
+# TODO: Update/Review this function to list of message
 @app.get("/api/messages/stats")
 def get_message_stats(
     db: Session = Depends(get_db),
@@ -182,7 +155,7 @@ def get_message_stats(
 ):
     """
     Get statistics about user's messages.
-    Returns: total count, upcoming count, by type, etc.
+    Returns: total count, by type (text/voice), etc.
     """
     try:
         from sqlalchemy import func
@@ -194,13 +167,6 @@ def get_message_stats(
         total = db.query(Message).filter(
             Message.user_id == current_user.id
         ).count()
-        
-        # Upcoming messages
-        upcoming = db.query(Message).filter(
-            Message.user_id == current_user.id,
-            Message.scheduled_date > now
-        ).count()
-        
         # Messages by type
         text_count = db.query(Message).filter(
             Message.user_id == current_user.id,
@@ -214,7 +180,6 @@ def get_message_stats(
         
         return {
             "total_messages": total,
-            "upcoming_messages": upcoming,
             "text_messages": text_count,
             "voice_messages": voice_count
         }
@@ -297,7 +262,6 @@ async def upload_voice_message(
     file: UploadFile = File(...),  # The audio file
     title: Optional[str] = Form(None),  # Title from form data
     focus_area: Optional[str] = Form(None),
-    scheduled_date: Optional[datetime] = Form(None),  # Optional date
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -356,7 +320,6 @@ async def upload_voice_message(
             focus_area = focus_area,
             message_type=MessageType.VOICE,
             voice_file_path=str(file_path),  
-            scheduled_date=scheduled_date,
             user_id=current_user.id
         )
         db.add(db_message)

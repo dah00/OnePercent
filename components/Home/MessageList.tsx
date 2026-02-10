@@ -52,7 +52,9 @@ const MessageList = ({ messages }: MessageListProps) => {
                 ) : null}
               </View>
             </View>
-            <Text>{formatDate(item.scheduled_date)}</Text>
+            <Text className="text-xs text-gray-400">
+              {formatDate(item.created_at)}
+            </Text>
           </View>
         </View>
       )}

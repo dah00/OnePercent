@@ -2,6 +2,8 @@ import AudioWaveformView from "@/components/Recording/AudioWaveformView";
 import { icons } from "@/constants/icons";
 import { useSaveEntry } from "@/lib/contexts/SaveEntryContext";
 import useAudioRecorderHook from "@/lib/hooks/useAudioRecorderHook";
+import { useMessages } from "@/lib/hooks/useMessages";
+import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
@@ -9,6 +11,7 @@ const RecordEntry = () => {
   const [recordTimer, setRecordTimer] = useState<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { setOnSave } = useSaveEntry();
+  const { uploadVoiceMessage } = useMessages();
   const {
     recordingInProgress,
     currentDecibel,
@@ -19,11 +22,31 @@ const RecordEntry = () => {
   } = useAudioRecorderHook();
 
   useEffect(() => {
-    setOnSave(() => {
-      // createMessage()
-      // Upload voice
+    setOnSave(async (data) => {
+      if (!audioUri) return;
+      const file = {
+        uri: audioUri,
+        type: "audio/m4a",
+        name: "recording.m4a",
+        duration: String(recordTimer),
+      };
+
+      const result = await uploadVoiceMessage({
+        file: file,
+        title: data.title,
+        focus_area: data.focusArea,
+      })
+
+      if(!result.success && result.error){
+        console.error("Save voice message failed: ", result.error)
+        // TODO: Show error to user 
+      }else{
+        // Navigate to either the list of logs or the home screen
+      }
+
+
     });
-  }, []);
+  }, [setOnSave, uploadVoiceMessage, audioUri, recordTimer]);
 
   // Manage interval based on isRecording state
   useEffect(() => {

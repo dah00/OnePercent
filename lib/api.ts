@@ -68,7 +68,6 @@ export interface MessagePayload {
   content?: string;
   message_type?: "text" | "voice";
   focus_area?: string | null;
-  scheduled_date?: string; // ISO string
 }
 
 export interface MessageResponse extends MessagePayload {
@@ -79,9 +78,15 @@ export interface MessageResponse extends MessagePayload {
   voice_file_path?: string | null;
 }
 
-export interface ScheduleUpdate {
-  scheduled_date: string; // ISO string format
+export interface VoiceMessagePayload {
+  file:
+    | File
+    | Blob
+    | { uri: string; type: string; name: string; duration: string };
+  title?: string | null;
+  focus_area?: string | null;
 }
+
 
 // #################### USER INTERFACES #######################################
 
@@ -94,7 +99,6 @@ export interface UserResponse {
 
 export interface MessageStatsResponse {
   total_messages: number;
-  upcoming_messages: number;
   text_messages: number;
   voice_messages: number;
 }
@@ -283,25 +287,19 @@ export async function deleteMessage(id: number): Promise<ApiResponse<void>> {
 
 // Upload voice message
 export async function uploadVoiceMessage(
-  file: File | Blob,
-  title?: string | null,
-  focus_area?: string | null,
-  scheduled_date?: string,
+  voiceMessagePayload: VoiceMessagePayload,
 ): Promise<ApiResponse<MessageResponse>> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT * 3); // Longer timeout for file uploads (30s)
 
   try {
     const formData = new FormData();
-    formData.append("file", file as any);
-    if (title != null && title !== "") {
-      formData.append("title", title);
+    formData.append("file", voiceMessagePayload.file as any);
+    if (voiceMessagePayload.title != null && voiceMessagePayload.title !== "") {
+      formData.append("title", voiceMessagePayload.title);
     }
-    if (focus_area) {
-      formData.append("focus_area", focus_area);
-    }
-    if (scheduled_date) {
-      formData.append("scheduled_date", scheduled_date);
+    if (voiceMessagePayload.focus_area) {
+      formData.append("focus_area", voiceMessagePayload.focus_area);
     }
 
     const token = await tokenStorage.getToken();
@@ -361,12 +359,6 @@ export async function uploadVoiceMessage(
           : "Network error: Could not upload file",
     };
   }
-}
-
-export async function getUpcomingMessages(): Promise<
-  ApiResponse<MessageResponse[]>
-> {
-  return apiRequest<MessageResponse[]>("/api/messages/upcoming");
 }
 
 export async function getMessageStats(): Promise<

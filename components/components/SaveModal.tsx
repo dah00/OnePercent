@@ -1,5 +1,4 @@
 import { useSaveEntry } from "@/lib/contexts/SaveEntryContext";
-import { useMessages } from "@/lib/hooks/useMessages";
 import React, { useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 import Button from "../Button";
@@ -8,22 +7,19 @@ import TextField from "../TextField";
 interface SaveModalProps {
   showSaveModal: boolean;
   setShowSaveModal: React.Dispatch<React.SetStateAction<boolean>>;
-  // setShowSaveModal: () => void
 }
-
-/**
- * TODO:
- * - Maybe add a title to the modal
- * - Hook the Save button with createMessage (API)
- */
 
 const SaveModal = ({ showSaveModal, setShowSaveModal }: SaveModalProps) => {
   const [title, setTitle] = useState<string>("");
   const [focusArea, setFocusArea] = useState<string>("");
-  const { createMessage } = useMessages();
   const { onSave } = useSaveEntry();
 
   const closeModal = () => setShowSaveModal(false);
+
+  const handleSave = () => {
+    onSave({ title, focusArea });
+    closeModal();
+  };
 
   return (
     <Modal visible={showSaveModal} animationType="slide" transparent>
@@ -61,14 +57,7 @@ const SaveModal = ({ showSaveModal, setShowSaveModal }: SaveModalProps) => {
             />
           </View>
           <View className="items-center mt-8">
-            <Button
-              text="Save"
-              onPress={() => {
-                onSave();
-                closeModal();
-              }}
-              size="md"
-            />
+            <Button text="Save" onPress={handleSave} size="md" />
           </View>
         </Pressable>
       </Pressable>

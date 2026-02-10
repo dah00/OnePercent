@@ -11,29 +11,42 @@ import {
 
 const WriteEntry = () => {
   const richText = useRef<RichEditor>(null);
+  const contentRef = useRef<string>("");
   const { setOnSave } = useSaveEntry();
   const { createMessage } = useMessages();
 
   useEffect(() => {
-    setOnSave(() => {
-      // createMessage()
+    setOnSave(async (data) => {
+      const content = contentRef.current ?? "";
+
+      const result = await createMessage({
+        title: data.title || null,
+        focus_area: data.focusArea || null,
+        content,
+        message_type: "text",
+      });
+      if (!result.success && result.error) {
+        console.error("Save failed:", result.error);
+        // TODO: show error to user (e.g. toast or inline message)
+      }
     });
 
-    // Focus the editor when component mounts
     const timer = setTimeout(() => {
       richText.current?.focusContentEditor();
     }, 500);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [setOnSave, createMessage]);
 
   return (
     <View className="flex-1 px-6">
-      {/* Write entry specific content goes here */}
       <RichEditor
         ref={richText}
         placeholder="I am proud I have achieved... "
         initialHeight={300}
+        onChange={(text) => {
+          contentRef.current = text;
+        }}
         editorStyle={{
           color: colors.textPrimary,
           contentCSSText: "font-size: 16px; line-height: 24px; padding: 12px;",

@@ -4,23 +4,20 @@ import type {
   MessagePayload,
   MessageResponse,
   MessageStatsResponse,
+  VoiceMessagePayload
 } from "@/lib/api";
 import {
   createMessage,
   deleteMessage,
   getMessages,
   getMessageStats,
-  getUpcomingMessages,
   updateMessage,
+  uploadVoiceMessage,
 } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 
 export function useMessages() {
   const [messages, setMessages] = useState<MessageResponse[]>([]);
-  const [upcomingMessages, setUpcomingMessages] = useState<MessageResponse[]>(
-    [],
-  );
-  const [isLoadingUpcoming, setIsLoadingUpcoming] = useState<boolean>(false);
   const [stats, setStats] = useState<MessageStatsResponse | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,25 +40,6 @@ export function useMessages() {
     setIsLoading(false);
   }, []);
 
-  const loadUpcomingMessages = useCallback(async () => {
-    setIsLoadingUpcoming(true);
-    const response = await getUpcomingMessages();
-    if (response.success && response.data) {
-      setUpcomingMessages(response.data);
-      setError(null);
-    } else {
-      // Ensure error is always a string
-      // console.log(response.error)
-      const errorMsg =
-        typeof response.error === "string"
-          ? response.error
-          : JSON.stringify(response.error) ||
-            "Failed to load upcoming messages";
-      setError(errorMsg);
-    }
-    setIsLoadingUpcoming(false);
-  }, []);
-
   const loadStats = useCallback(async () => {
     setIsLoadingStats(true);
     const response = await getMessageStats();
@@ -81,9 +59,8 @@ export function useMessages() {
 
   useEffect(() => {
     loadMessages();
-    loadUpcomingMessages();
     loadStats();
-  }, [loadMessages, loadUpcomingMessages, loadStats]);
+  }, [loadMessages, loadStats]);
 
   const createMessageHandler = async (payload: MessagePayload) => {
     const response = await createMessage(payload);
@@ -98,18 +75,27 @@ export function useMessages() {
     const newMessage: MessageResponse = response.data;
     setMessages((prev) => [newMessage, ...prev]);
 
-    if (
-      newMessage.scheduled_date &&
-      new Date(newMessage.scheduled_date) > new Date()
-    ) {
-      setUpcomingMessages((prev) => [newMessage, ...prev]);
-    }
 
     await loadStats();
 
     return { success: true };
   };
 
+  const uploadVoiceMessageHandler = async (voiceMessagePayload: VoiceMessagePayload) => {
+    const response = await uploadVoiceMessage(voiceMessagePayload)
+    if(!response.success || !response.data){
+      const errorMsg = typeof response.error === "string" ? response.error : JSON.stringify(response.error || "Failed to upload a voice message")
+      return {success: false, error: errorMsg}
+    }
+    
+    const newVoiceMessage: MessageResponse = response.data;
+    setMessages((prev) => [newVoiceMessage, ...prev])
+
+    await loadStats();
+
+    return {success: true}
+  }
+ 
   const updateMessageHandler = async (
     id: number,
     payload: Partial<MessagePayload>,
@@ -117,9 +103,6 @@ export function useMessages() {
     const response = await updateMessage(id, payload);
     if (response.success && response.data) {
       setMessages((prev) =>
-        prev.map((message) => (message.id === id ? response.data! : message)),
-      );
-      setUpcomingMessages((prev) =>
         prev.map((message) => (message.id === id ? response.data! : message)),
       );
 
@@ -138,9 +121,6 @@ export function useMessages() {
     const response = await deleteMessage(id);
     if (response.success) {
       setMessages((prev) => prev.filter((message) => message.id !== id));
-      setUpcomingMessages((prev) =>
-        prev.filter((message) => message.id !== id),
-      );
 
       await loadStats();
       return { success: true };
@@ -155,15 +135,12 @@ export function useMessages() {
 
   return {
     messages,
-    upcomingMessages,
-    isLoadingUpcoming,
     isLoading,
     error,
     reload: loadMessages,
-    reloadUpcomingMessage: loadUpcomingMessages,
-    updateSchedule: updateMessage,
-    createMessage: createMessageHandler,
     updateMessage: updateMessageHandler,
+    createMessage: createMessageHandler,
+    uploadVoiceMessage: uploadVoiceMessageHandler,
     deleteMessage: deleteMessageHandler,
   };
 }

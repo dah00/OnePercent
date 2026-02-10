@@ -14,7 +14,6 @@ class MessageBase(BaseModel):
     title: Optional[str] = Field(default=None, max_length=255)
     content: Optional[str]
     message_type: MessageType = MessageType.TEXT
-    scheduled_date: Optional[datetime]
     focus_area: Optional[str] = Field(default=None, max_length=255)
 
 
@@ -26,11 +25,7 @@ class MessageUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=255)
     content: Optional[str] = None
     message_type: Optional[MessageType] = None
-    scheduled_date: Optional[datetime] = None
     focus_area: Optional[str] = None
-
-class ScheduleUpdate(BaseModel):
-    scheduled_date: datetime
 
 class MessageResponse(MessageBase):
     id: int

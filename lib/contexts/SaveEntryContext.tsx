@@ -1,14 +1,15 @@
 import { createContext, useCallback, useContext, useRef } from "react";
 
-
 export type SaveModalData = {
   title: string;
   focusArea: string;
 };
 
+export type SaveResult = { success: boolean; error?: string };
+
 type SaveContextType = {
-  onSave: (data: SaveModalData) => void;
-  setOnSave: (fn: (data: SaveModalData) => void) => void;
+  onSave: (data: SaveModalData) => Promise<SaveResult | void>;
+  setOnSave: (fn: (data: SaveModalData) => void | Promise<SaveResult | void>) => void;
 };
 
 const SaveEntryContext = createContext<SaveContextType | null>(null);
@@ -24,14 +25,19 @@ export const SaveEntryProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const onSaveRef = useRef<(data: SaveModalData) => void>(() => {});
+  const onSaveRef = useRef<
+    (data: SaveModalData) => void | Promise<SaveResult | void>
+  >(() => {});
 
-  const setOnSave = useCallback((fn: (data: SaveModalData) => void) => {
-    onSaveRef.current = fn;
-  }, []);
+  const setOnSave = useCallback(
+    (fn: (data: SaveModalData) => void | Promise<SaveResult | void>) => {
+      onSaveRef.current = fn;
+    },
+    [],
+  );
 
-  const onSave = useCallback((data: SaveModalData) => {
-    onSaveRef.current(data);
+  const onSave = useCallback(async (data: SaveModalData) => {
+    return await onSaveRef.current(data);
   }, []);
 
   return (

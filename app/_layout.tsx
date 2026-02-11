@@ -1,9 +1,16 @@
+import { colors } from "@/constants/colors";
+import { icons } from "@/constants/icons";
 import { AuthProvider } from "@/lib/AuthContext";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import React from "react";
-import { StatusBar, Text, TextInput } from "react-native";
+import { Image, StatusBar, Text, TextInput, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast, {
+  ErrorToast,
+  SuccessToast,
+  type ToastConfigParams,
+} from "react-native-toast-message";
 import "./global.css";
 
 // Apply default font family globally before first render
@@ -33,8 +40,8 @@ import "./global.css";
     const styleArray = Array.isArray(originStyle)
       ? originStyle
       : originStyle
-      ? [originStyle]
-      : [];
+        ? [originStyle]
+        : [];
     return React.cloneElement(origin, {
       style: [...styleArray, { fontFamily: "InstrumentSans" }],
     });
@@ -47,13 +54,73 @@ import "./global.css";
     const styleArray = Array.isArray(originStyle)
       ? originStyle
       : originStyle
-      ? [originStyle]
-      : [];
+        ? [originStyle]
+        : [];
     return React.cloneElement(origin, {
       style: [...styleArray, { fontFamily: "InstrumentSans" }],
     });
   };
 }
+
+// Toast configuration for success and failed events
+const toastConfig = {
+  success: (props: ToastConfigParams<object>) => (
+    <SuccessToast
+      {...props}
+      style={{ borderLeftColor: colors.success, borderLeftWidth: 6 }}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        alignSelf: "center",
+        alignItems: "center",
+      }}
+      text1Style={{
+        fontSize: 22,
+        fontWeight: "600",
+        color: colors.success,
+        textAlign: "center",
+      }}
+      text2Style={{
+        fontSize: 15,
+        color: colors.textPrimary,
+        textAlign: "center",
+      }}
+      renderLeadingIcon={() => (
+        <View className="justify-center pl-8">
+          <Image source={icons.successful_check} className="w-10 h-10" />
+        </View>
+      )}
+    />
+  ),
+  error: (props: ToastConfigParams<object>) => (
+    <ErrorToast
+      {...props}
+      style={{ borderLeftColor: colors.error, borderLeftWidth: 6 }}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        alignSelf: "center",
+        alignItems: "center",
+      }}
+      text1Style={{
+        fontSize: 22,
+        fontWeight: "600",
+        color: colors.error,
+        textAlign: "center",
+      }}
+      text2Style={{
+        fontSize: 15,
+        color: colors.textPrimary,
+        textAlign: "center",
+      }}
+      renderLeadingIcon={() => (
+        <View className="justify-center px-6">
+          <Image source={icons.failed_cross} className="w-12 h-12" />
+        </View>
+      )}
+    />
+  ),
+};
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -72,6 +139,7 @@ export default function RootLayout() {
           <Stack.Screen name="(screens)" options={{ headerShown: false }} />
           <Stack.Screen name="(entries)" options={{ headerShown: false }} />
         </Stack>
+        <Toast config={toastConfig} topOffset={60} visibilityTime={5000} />
       </AuthProvider>
     </SafeAreaProvider>
   );

@@ -3,7 +3,6 @@ import { icons } from "@/constants/icons";
 import { useSaveEntry } from "@/lib/contexts/SaveEntryContext";
 import useAudioRecorderHook from "@/lib/hooks/useAudioRecorderHook";
 import { useMessages } from "@/lib/hooks/useMessages";
-import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
@@ -23,7 +22,7 @@ const RecordEntry = () => {
 
   useEffect(() => {
     setOnSave(async (data) => {
-      if (!audioUri) return;
+      if (!audioUri) return { success: false, error: "No recording to save." };
       const file = {
         uri: audioUri,
         type: "audio/m4a",
@@ -32,19 +31,14 @@ const RecordEntry = () => {
       };
 
       const result = await uploadVoiceMessage({
-        file: file,
+        file,
         title: data.title,
         focus_area: data.focusArea,
-      })
-
-      if(!result.success && result.error){
-        console.error("Save voice message failed: ", result.error)
-        // TODO: Show error to user 
-      }else{
-        // Navigate to either the list of logs or the home screen
+      });
+      if (!result.success && result.error) {
+        return { success: false, error: result.error };
       }
-
-
+      return { success: true };
     });
   }, [setOnSave, uploadVoiceMessage, audioUri, recordTimer]);
 

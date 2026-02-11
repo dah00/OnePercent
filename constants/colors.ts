@@ -11,7 +11,7 @@ export const colors = {
   // accent: "#89CFF0",
   beige: "#FFFFE3",
   blueGray: "#6D8196",
-  success: "#10B981",
+  success: "#00ba00",
   error: "#EF4444",
 };
 

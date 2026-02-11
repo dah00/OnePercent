@@ -26,9 +26,9 @@ const WriteEntry = () => {
         message_type: "text",
       });
       if (!result.success && result.error) {
-        console.error("Save failed:", result.error);
-        // TODO: show error to user (e.g. toast or inline message)
+        return { success: false, error: result.error };
       }
+      return { success: true };
     });
 
     const timer = setTimeout(() => {

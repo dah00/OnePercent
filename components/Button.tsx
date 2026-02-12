@@ -1,5 +1,6 @@
+import { colors } from "@/constants/colors";
 import React from "react";
-import { Pressable, Text } from "react-native";
+import { ActivityIndicator, Image, Pressable, Text } from "react-native";
 
 interface ButtonProps {
   onPress: () => void;
@@ -47,6 +48,7 @@ const Button = ({
       style={{ opacity: isDisabled ? 0.5 : 1 }}
     >
       <Text className="text-white text-xl">{text}</Text>
+      {isLoading && <ActivityIndicator size="small" color={colors.background} />}
     </Pressable>
   );
 };

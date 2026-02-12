@@ -42,12 +42,12 @@ const EntriesLayout = () => {
             >
               <BackButton useAbsolute={false} />
               <Pressable
-                className="px-6 py-3 rounded-full bg-accent items-center justify-center"
+                className="px-6 py-3 rounded-full bg-primary items-center justify-center"
                 onPress={() => {
                   setShowSaveModal(true);
                 }}
               >
-                <Text className="text-white font-bold text-lg">Save</Text>
+                <Text className="text-white font-bold text-lg">Done</Text>
               </Pressable>
             </View>
 

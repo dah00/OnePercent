@@ -1,4 +1,5 @@
-import React from "react";
+import { MessageResponse } from "@/lib/api";
+import React, { useEffect } from "react";
 import { FlatList, Text, View } from "react-native";
 
 /**
@@ -22,10 +23,10 @@ const pastSevenDayLogs: DayLog[] = [
   { day: "2025-12-28", logged: true },
 ];
 
-const Streak = () => {
+const Streak = ( {messageList}: {messageList: MessageResponse[]}) => {
   const getDayName = (dateString: string): string => {
     const [year, month, day] = dateString.split("-").map(Number);
-    const date = new Date(year, month - 1, day); 
+    const date = new Date(year, month - 1, day);
     // console.log(date)
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return dayNames[date.getDay()];
@@ -44,6 +45,38 @@ const Streak = () => {
       </View>
     );
   };
+
+  // TODO: Finish get the last 7 logs 
+  useEffect(() => {
+    // Get the logs within the past 7 days
+    const today = new Date();
+    let pastSevenDayLogs = [
+      {day: today.getDate(), logged: false},
+      {day: today.getDate()-1, logged: false},
+      {day: today.getDate()-2, logged: false},
+      {day: today.getDate()-3, logged: false},
+      {day: today.getDate()-4, logged: false},
+      {day: today.getDate()-5, logged: false},
+      {day: today.getDate()-6, logged: false},
+    ]
+
+    const eightDaysAgo = new Date();
+    eightDaysAgo.setDate(today.getDate() - 8);
+    let logsInPastSevenDays: Date[] = []
+    messageList.forEach((message: MessageResponse) => {
+      const logDate = new Date(message.created_at)
+      if(logDate >= eightDaysAgo){
+        logsInPastSevenDays.push(new Date(message.created_at))
+      }
+    })
+
+    // pastSevenDayLogs.forEach((log) => {
+    //   if(logsInPastSevenDays.includes(log)){
+        
+    //   }
+    // })
+    // console.log(eightDaysAgo);
+  }, []);
 
   return (
     <View className="px-6 gap-2 items-center justify-between">

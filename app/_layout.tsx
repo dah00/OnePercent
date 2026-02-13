@@ -139,6 +139,7 @@ export default function RootLayout() {
           <Stack.Screen name="(screens)" options={{ headerShown: false }} />
           <Stack.Screen name="(entries)" options={{ headerShown: false }} />
         </Stack>
+        {/* TODO: Fix: Toast doesn't dismiss after 5 second */}
         <Toast config={toastConfig} topOffset={60} autoHide={true} visibilityTime={5000} swipeable={true}/>
       </AuthProvider>
     </SafeAreaProvider>

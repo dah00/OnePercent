@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TOKEN_KEY = "onepercent_token";
 const API_BASE_URL = __DEV__
-  ? "http://10.0.0.237:8000"
+  ? "http://10.1.10.81:8000"
   : "https://your-deployed-api.com";
 
 // Get the API base URL dynamically based on the current network
@@ -86,7 +86,6 @@ export interface VoiceMessagePayload {
   title?: string | null;
   focus_area?: string | null;
 }
-
 
 // #################### USER INTERFACES #######################################
 

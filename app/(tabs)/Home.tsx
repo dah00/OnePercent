@@ -6,7 +6,7 @@ import { icons } from "@/constants/icons";
 import { useEntryOverlay } from "@/lib/contexts/EntryOverlayContext";
 import { useMessages } from "@/lib/hooks/useMessages";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Keyboard,
@@ -29,6 +29,11 @@ const Home = () => {
     reload,
     createMessage,
   } = useMessages();
+
+  useEffect(() => {
+    // filter messages to the last 7 days 
+    
+  }, [])
 
   return (
     <SafeAreaView className="flex-1 bg-secondary " edges={[]}>
@@ -103,12 +108,13 @@ const Home = () => {
           )}
 
           {/** Streak indicator */}
+          {/* {console.log("Messages: ", messages)} */}
           <View className="mt-8 px-6 gap-2">
             <Text className="font-semibold text-2xl">Past 7 days Streak</Text>
             <Text className="color-button">
               5 out of 7 streak in the past 7 days
             </Text>
-            <Streak />
+            <Streak messageList={messages}/>
           </View>
 
           {/* Messages list (optional - uncomment to show) */}

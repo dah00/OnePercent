@@ -1,33 +1,23 @@
 import { MessageResponse } from "@/lib/api";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 
-/**
- * TODO:
- * - fix: show all 7 days and not just 5
- * - fix display days from right to left for the past 7 days
- */
+/** Format a Date to YYYY-MM-DD for comparison. */
+function toDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 interface DayLog {
   day: string;
   logged: boolean;
 }
 
-const pastSevenDayLogs: DayLog[] = [
-  { day: "2025-12-22", logged: true },
-  { day: "2025-12-23", logged: false },
-  { day: "2025-12-24", logged: true },
-  { day: "2025-12-25", logged: true },
-  { day: "2025-12-26", logged: false },
-  { day: "2025-12-27", logged: false },
-  { day: "2025-12-28", logged: true },
-];
+const Streak = ({ messageList }: { messageList: MessageResponse[] }) => {
+  const [pastSevenDayStreak, setPastSevenDayStreak] = useState<DayLog[]>([]);
 
-const Streak = ( {messageList}: {messageList: MessageResponse[]}) => {
   const getDayName = (dateString: string): string => {
     const [year, month, day] = dateString.split("-").map(Number);
     const date = new Date(year, month - 1, day);
-    // console.log(date)
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return dayNames[date.getDay()];
   };
@@ -46,42 +36,32 @@ const Streak = ( {messageList}: {messageList: MessageResponse[]}) => {
     );
   };
 
-  // TODO: Finish get the last 7 logs 
   useEffect(() => {
-    // Get the logs within the past 7 days
     const today = new Date();
-    let pastSevenDayLogs = [
-      {day: today.getDate(), logged: false},
-      {day: today.getDate()-1, logged: false},
-      {day: today.getDate()-2, logged: false},
-      {day: today.getDate()-3, logged: false},
-      {day: today.getDate()-4, logged: false},
-      {day: today.getDate()-5, logged: false},
-      {day: today.getDate()-6, logged: false},
-    ]
+    // Build last 7 days: [6 days ago, 5 days ago, ..., today] (left to right = past to present)
+    const sevenDays: DayLog[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      sevenDays.push({ day: toDateKey(d), logged: false });
+    }
 
-    const eightDaysAgo = new Date();
-    eightDaysAgo.setDate(today.getDate() - 8);
-    let logsInPastSevenDays: Date[] = []
-    messageList.forEach((message: MessageResponse) => {
-      const logDate = new Date(message.created_at)
-      if(logDate >= eightDaysAgo){
-        logsInPastSevenDays.push(new Date(message.created_at))
-      }
-    })
+    // Set of calendar dates (YYYY-MM-DD) that have at least one log
+    const loggedDates = new Set(
+      messageList.map((m) => toDateKey(new Date(m.created_at)))
+    );
 
-    // pastSevenDayLogs.forEach((log) => {
-    //   if(logsInPastSevenDays.includes(log)){
-        
-    //   }
-    // })
-    // console.log(eightDaysAgo);
-  }, []);
+    const withLogged = sevenDays.map((entry) => ({
+      ...entry,
+      logged: loggedDates.has(entry.day),
+    }));
+    setPastSevenDayStreak(withLogged);
+  }, [messageList]);
 
   return (
     <View className="px-6 gap-2 items-center justify-between">
       <FlatList
-        data={pastSevenDayLogs}
+        data={pastSevenDayStreak}
         keyExtractor={(item) => item.day}
         renderItem={renderDayItem}
         horizontal

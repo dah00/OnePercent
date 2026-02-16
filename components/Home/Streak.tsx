@@ -14,6 +14,7 @@ interface DayLog {
 
 const Streak = ({ messageList }: { messageList: MessageResponse[] }) => {
   const [pastSevenDayStreak, setPastSevenDayStreak] = useState<DayLog[]>([]);
+  const [logCount, setLogCount] = useState<number>();
 
   const getDayName = (dateString: string): string => {
     const [year, month, day] = dateString.split("-").map(Number);
@@ -48,26 +49,38 @@ const Streak = ({ messageList }: { messageList: MessageResponse[] }) => {
 
     // Set of calendar dates (YYYY-MM-DD) that have at least one log
     const loggedDates = new Set(
-      messageList.map((m) => toDateKey(new Date(m.created_at)))
+      messageList.map((m) => toDateKey(new Date(m.created_at))),
     );
 
-    const withLogged = sevenDays.map((entry) => ({
-      ...entry,
-      logged: loggedDates.has(entry.day),
-    }));
+    let count = 0;
+    const withLogged = sevenDays.map((entry) => {
+      let isLogged: boolean = false;
+      if (loggedDates.has(entry.day)) {
+        isLogged = true;
+        count++;
+      }
+      return {
+        ...entry,
+        logged: isLogged,
+      };
+    });
+    setLogCount(count);
     setPastSevenDayStreak(withLogged);
   }, [messageList]);
 
   return (
-    <View className="px-6 gap-2 items-center justify-between">
-      <FlatList
-        data={pastSevenDayStreak}
-        keyExtractor={(item) => item.day}
-        renderItem={renderDayItem}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 8 }}
-      />
+    <View>
+      <Text className="color-darkGrey text-xl">{`${logCount} out of 7 streak in the past 7 days`}</Text>
+      <View className="px-6 gap-2 items-center justify-between">
+        <FlatList
+          data={pastSevenDayStreak}
+          keyExtractor={(item) => item.day}
+          renderItem={renderDayItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingVertical: 8 }}
+        />
+      </View>
     </View>
   );
 };

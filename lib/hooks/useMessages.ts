@@ -4,7 +4,7 @@ import type {
   MessagePayload,
   MessageResponse,
   MessageStatsResponse,
-  VoiceMessagePayload
+  VoiceMessagePayload,
 } from "@/lib/api";
 import {
   createMessage,
@@ -75,27 +75,33 @@ export function useMessages() {
     const newMessage: MessageResponse = response.data;
     setMessages((prev) => [newMessage, ...prev]);
 
+    await loadStats();
+
+    return { success: true };
+  };
+
+  const uploadVoiceMessageHandler = async (
+    voiceMessagePayload: VoiceMessagePayload,
+  ) => {
+    const response = await uploadVoiceMessage(voiceMessagePayload);
+    if (!response.success || !response.data) {
+      const errorMsg =
+        typeof response.error === "string"
+          ? response.error
+          : JSON.stringify(
+              response.error || "Failed to upload a voice message",
+            );
+      return { success: false, error: errorMsg };
+    }
+
+    const newVoiceMessage: MessageResponse = response.data;
+    setMessages((prev) => [newVoiceMessage, ...prev]);
 
     await loadStats();
 
     return { success: true };
   };
 
-  const uploadVoiceMessageHandler = async (voiceMessagePayload: VoiceMessagePayload) => {
-    const response = await uploadVoiceMessage(voiceMessagePayload)
-    if(!response.success || !response.data){
-      const errorMsg = typeof response.error === "string" ? response.error : JSON.stringify(response.error || "Failed to upload a voice message")
-      return {success: false, error: errorMsg}
-    }
-    
-    const newVoiceMessage: MessageResponse = response.data;
-    setMessages((prev) => [newVoiceMessage, ...prev])
-
-    await loadStats();
-
-    return {success: true}
-  }
- 
   const updateMessageHandler = async (
     id: number,
     payload: Partial<MessagePayload>,

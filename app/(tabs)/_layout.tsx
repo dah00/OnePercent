@@ -1,6 +1,5 @@
 import EntryFloatingActionButton from "@/components/components/EntryFloatingActionButton";
 import { colors } from "@/constants/colors";
-import { icons } from "@/constants/icons";
 import {
   EntryOverlayProvider,
   useEntryOverlay,
@@ -8,28 +7,32 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useFocusEffect } from "expo-router";
 import React, { useCallback } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
-const TabIcon = ({ focused, icon, title }: any) => {
+/** Outline = unfocused (thin), filled = focused (bold). Uses Ionicons so we get real weight change. */
+type TabIconProps = {
+  focused: boolean;
+  title: string;
+  iconName: keyof typeof Ionicons.glyphMap;
+};
+
+const TabIcon = ({ focused, title, iconName }: TabIconProps) => {
+  const name = focused ? iconName : `${String(iconName)}-outline` as keyof typeof Ionicons.glyphMap;
   return (
     <View
       style={{
         flex: 1,
         width: "100%",
         height: "100%",
-        // backgroundColor: "purple",
         alignItems: "center",
         justifyContent: "center",
         gap: 4,
       }}
     >
-      <Image
-        source={icon}
-        style={{
-          width: 24,
-          height: 24,
-          tintColor: focused ? colors.background : colors.button,
-        }}
+      <Ionicons
+        name={name}
+        size={24}
+        color={focused ? colors.background : colors.button}
       />
       <Text
         style={{
@@ -92,7 +95,7 @@ const TabsLayoutContent = () => {
             title: "Home",
             headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <TabIcon focused={focused} icon={icons.home} title="Home" />
+              <TabIcon focused={focused} iconName="home" title="Home" />
             ),
           }}
         />
@@ -102,7 +105,7 @@ const TabsLayoutContent = () => {
             title: "Records",
             headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <TabIcon focused={focused} icon={icons.records} title="Records" />
+              <TabIcon focused={focused} iconName="folder" title="Records" />
             ),
           }}
         />
@@ -112,7 +115,7 @@ const TabsLayoutContent = () => {
             title: "Profile",
             headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <TabIcon focused={focused} icon={icons.user} title="Profile" />
+              <TabIcon focused={focused} iconName="person" title="Profile" />
             ),
           }}
         />

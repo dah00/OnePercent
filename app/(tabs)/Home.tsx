@@ -1,5 +1,4 @@
 import EntryFloatingActionButton from "@/components/components/EntryFloatingActionButton";
-import MessageList from "@/components/Home/MessageList";
 import Streak from "@/components/Home/Streak";
 import { colors } from "@/constants/colors";
 import { icons } from "@/constants/icons";
@@ -22,18 +21,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Home = () => {
   const [backendMessage, setBackendMessage] = useState<string>("");
   const { showEntryOption, setShowEntryOption } = useEntryOverlay();
-  const {
-    messages,
-    isLoading,
-    error,
-    reload,
-    createMessage,
-  } = useMessages();
+  const { messages, isLoading, error, reload, createMessage } = useMessages();
 
   useEffect(() => {
-    // filter messages to the last 7 days 
-    
-  }, [])
+    // filter messages to the last 7 days
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-secondary " edges={[]}>
@@ -44,7 +36,7 @@ const Home = () => {
           className="flex-1"
         >
           {/** Header */}
-          <View className="mb-10 bg-textPrimary h-56 rounded-b-[38px]">
+          <View className="mb-10 bg-darkGrey h-56 rounded-b-[38px]">
             <View className="flex-row justify-between px-6 pt-32 h-full">
               <Text className="color-backgroundSecondary font-instrument text-4xl">
                 Hello, <Text className="color-primary"> Rio</Text>
@@ -110,11 +102,15 @@ const Home = () => {
           {/** Streak indicator */}
           {/* {console.log("Messages: ", messages)} */}
           <View className="mt-8 px-6 gap-2">
-            <Text className="font-semibold text-2xl">Past 7 days Streak</Text>
-            <Text className="color-button">
-              5 out of 7 streak in the past 7 days
-            </Text>
-            <Streak messageList={messages}/>
+            <View className="flex-row justify-between items-center">
+              <Text className="font-semibold text-2xl">Past 7 days Streak</Text>
+              <Pressable onPress={() => router.replace("/Records")}>
+                <Text className="text-primary font-semibold text-lg">
+                  View All{" "}
+                </Text>
+              </Pressable>
+            </View>
+            <Streak messageList={messages} />
           </View>
 
           {/* Messages list (optional - uncomment to show) */}

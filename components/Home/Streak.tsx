@@ -14,7 +14,7 @@ interface DayLog {
 
 const Streak = ({ messageList }: { messageList: MessageResponse[] }) => {
   const [pastSevenDayStreak, setPastSevenDayStreak] = useState<DayLog[]>([]);
-  const [logCount, setLogCount] = useState<number>();
+  const [logCount, setLogCount] = useState<number>(0);
 
   const getDayName = (dateString: string): string => {
     const [year, month, day] = dateString.split("-").map(Number);

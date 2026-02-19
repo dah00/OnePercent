@@ -1,75 +1,95 @@
 import { colors } from "@/constants/colors";
 import { useMessages } from "@/lib/hooks/useMessages";
+import { formatDateToMMDDYY } from "@/lib/utils/dateFormatters";
 import React, { useEffect, useState } from "react";
 import { Text, useWindowDimensions, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 
 type stackDataType = {
   label: string;
-  stacks: [{ value: number; color: string }, { value: number; color: string }];
+  stacks: Array<{ value: number; color: string }>;
+  topLabelComponent?: () => React.ReactNode;
+  labelComponent?: () => React.ReactNode;
 };
 
-// Labels:
-/**
- * weekData = [
- * {label: "01/05", stacks: [{value: 1, color: colors.primary}]}
- * {label: "01/12", stacks: [{value: 1, color: colors.primary}]}
- * {label: "01/18", stacks: [{value: 1, color: colors.primary}], {value: 1, color: colors.success}}
- *
- * ]
- */
+const barColors = {
+  text: colors.primary,
+  audio: colors.success,
+};
 
 const BarChartComponent = () => {
   const { messages } = useMessages();
-  const [weekData, setWeekDate] = useState<stackDataType[]>([]);
+  const [weekData, setWeekData] = useState<stackDataType[]>([]);
   const [monthData, setMonthData] = useState<stackDataType[]>([]);
   const [yearData, setYearData] = useState<stackDataType[]>([]);
-  const { width, height } = useWindowDimensions();
-
-  const barColor = {
-    text: colors.primary,
-    audio: colors.success,
-  };
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
-    // Set Date (MM/DD) of the last 7 days: 6 days ago .. today
-    let pastSevenDay: Date[] = [];
-    let today = new Date();
+    const today = new Date();
 
-    console.log(messages[4]);
-
-    // Filter messages to get messages from the last 7 days
-    const past7DaysMessages = messages.filter((message) => {
-      const messageDate = new Date(message.created_at);
-      return messageDate.getDate() > messageDate.getDate() - 7;
-    });
-
-    let weekMessages: stackDataType[] = [];
-    past7DaysMessages.forEach((message) => {
-      const messageDate = new Date(message.created_at);
-      const label = messageDate.toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "2-digit",
-      });
-      const isText = message.message_type === "text";
-      weekMessages.push({
-        label: label,
-        stacks: [
-          { value: isText ? 1 : 0, color: "#4CAF50" }, // Text log
-          { value: isText ? 0 : 1, color: "#2196F3" }, // voice log
-        ],
-      });
-    });
-
-    setWeekDate(weekMessages);
+    // Build 7 bars: one per day (6 days ago ... today)
+    const sevenDays: stackDataType[] = [];
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
-      pastSevenDay.push(d);
+      const dateKey = formatDateToMMDDYY(d);
+
+      // Count text and voice logs for this day
+      const logsOnDay = messages.filter((m) => {
+        const msgDate = new Date(m.created_at);
+        return formatDateToMMDDYY(msgDate) === dateKey;
+      });
+
+      const textCount = logsOnDay.filter((m) => m.message_type === "text").length;
+      const voiceCount = logsOnDay.filter(
+        (m) => m.message_type === "voice"
+      ).length;
+
+      const totalCount = textCount + voiceCount;
+
+      sevenDays.push({
+        label: dateKey,
+        stacks: [
+          { value: textCount, color: barColors.text },
+          { value: voiceCount, color: barColors.audio },
+        ],
+        topLabelComponent: () => (
+          <Text style={{ fontSize: 12, fontWeight: "600" }}>
+            {totalCount}
+          </Text>
+        ),
+        labelComponent: () => (
+          <View style={{ alignItems: "center", width: 60 }}>
+            <Text
+              style={{
+                fontSize: 10,
+                color: colors.textPrimary,
+                transform: [{ rotate: "-90deg" }],
+              }}
+            >
+              {dateKey}
+            </Text>
+          </View>
+        ),
+      });
     }
+
+    setWeekData(sevenDays);
   }, [messages]);
+
+  // Y-axis: maxValue = noOfSections * stepValue. Scale to fit data.
+  const maxBarTotal =
+    weekData.length > 0
+      ? Math.max(
+          ...weekData.map((d) =>
+            d.stacks.reduce((sum, s) => sum + s.value, 0)
+          )
+        )
+      : 0;
+  const maxValue = Math.max(4, maxBarTotal);
+  const noOfSections = 4;
+  const stepValue = Math.ceil(maxValue / noOfSections);
 
   return (
     <View>
@@ -78,16 +98,17 @@ const BarChartComponent = () => {
         stackData={weekData}
         barWidth={24}
         spacing={12}
-        maxValue={8}
-        noOfSections={4}
-        stepValue={2}
+        maxValue={noOfSections * stepValue}
+        noOfSections={noOfSections}
+        stepValue={stepValue}
         roundedTop={true}
         adjustToWidth={true}
         parentWidth={width - 32}
-        xAxisLabelTextStyle={{ fontSize: 12 }}
-        // onPress={(item, index) => {
-        //   /* optional */
-        // }}
+        yAxisThickness={0}
+        xAxisThickness={1}
+        hideRules={true}
+        hideYAxisText={true}
+        labelsExtraHeight={40}
       />
     </View>
   );

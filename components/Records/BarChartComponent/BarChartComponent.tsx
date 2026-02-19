@@ -2,7 +2,7 @@ import { colors } from "@/constants/colors";
 import { useMessages } from "@/lib/hooks/useMessages";
 import { formatDateToMMDDYY } from "@/lib/utils/dateFormatters";
 import React, { useEffect, useState } from "react";
-import { Text, useWindowDimensions, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 
 type stackDataType = {
@@ -22,7 +22,7 @@ const BarChartComponent = () => {
   const [weekData, setWeekData] = useState<stackDataType[]>([]);
   const [monthData, setMonthData] = useState<stackDataType[]>([]);
   const [yearData, setYearData] = useState<stackDataType[]>([]);
-  const { width } = useWindowDimensions();
+  const [chartWidth, setChartWidth] = useState(0);
 
   useEffect(() => {
     const today = new Date();
@@ -41,9 +41,11 @@ const BarChartComponent = () => {
         return formatDateToMMDDYY(msgDate) === dateKey;
       });
 
-      const textCount = logsOnDay.filter((m) => m.message_type === "text").length;
+      const textCount = logsOnDay.filter(
+        (m) => m.message_type === "text",
+      ).length;
       const voiceCount = logsOnDay.filter(
-        (m) => m.message_type === "voice"
+        (m) => m.message_type === "voice",
       ).length;
 
       const totalCount = textCount + voiceCount;
@@ -55,15 +57,13 @@ const BarChartComponent = () => {
           { value: voiceCount, color: barColors.audio },
         ],
         topLabelComponent: () => (
-          <Text style={{ fontSize: 12, fontWeight: "600" }}>
-            {totalCount}
-          </Text>
+          <Text style={{ fontSize: 12, fontWeight: "600" }}>{totalCount}</Text>
         ),
         labelComponent: () => (
-          <View style={{ alignItems: "center", width: 60 }}>
+          <View className="items-start w-20 bg-border ">
             <Text
               style={{
-                fontSize: 10,
+                fontSize: 12,
                 color: colors.textPrimary,
                 transform: [{ rotate: "-90deg" }],
               }}
@@ -82,9 +82,7 @@ const BarChartComponent = () => {
   const maxBarTotal =
     weekData.length > 0
       ? Math.max(
-          ...weekData.map((d) =>
-            d.stacks.reduce((sum, s) => sum + s.value, 0)
-          )
+          ...weekData.map((d) => d.stacks.reduce((sum, s) => sum + s.value, 0)),
         )
       : 0;
   const maxValue = Math.max(4, maxBarTotal);
@@ -92,24 +90,53 @@ const BarChartComponent = () => {
   const stepValue = Math.ceil(maxValue / noOfSections);
 
   return (
-    <View>
-      <Text>BarChartComponent</Text>
-      <BarChart
-        stackData={weekData}
-        barWidth={24}
-        spacing={12}
-        maxValue={noOfSections * stepValue}
-        noOfSections={noOfSections}
-        stepValue={stepValue}
-        roundedTop={true}
-        adjustToWidth={true}
-        parentWidth={width - 32}
-        yAxisThickness={0}
-        xAxisThickness={1}
-        hideRules={true}
-        hideYAxisText={true}
-        labelsExtraHeight={40}
-      />
+    <View
+      className="bg-backgroundSecondary rounded-2xl h-[360px] p-4"
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 24,
+      }}
+    >
+      <View className="w-[80%] self-center bg-background rounded-xl">
+        <View className="flex-row justify-around gap-1 p-1">
+          <View className={`bg-white flex-1 items-center rounded-lg`}>
+            <Pressable>
+              <Text className="text-xl">Week</Text>
+            </Pressable>
+          </View>
+          <View className="flex-1 items-center">
+            <Pressable className="">
+              <Text className="text-xl">Month</Text>
+            </Pressable>
+          </View>
+          <View className="flex-1 items-center">
+            <Pressable className="">
+              <Text className="text-xl">Year</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{ width: "100%", flex: 1 }}
+        onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
+      >
+        <BarChart
+          stackData={weekData}
+          maxValue={noOfSections * stepValue}
+          noOfSections={noOfSections}
+          stepValue={stepValue}
+          barBorderRadius={8}
+          adjustToWidth={true}
+          parentWidth={chartWidth}
+          yAxisThickness={0}
+          xAxisThickness={1}
+          hideRules={true}
+          hideYAxisText={true}
+          labelsExtraHeight={40}
+        />
+      </View>
     </View>
   );
 };

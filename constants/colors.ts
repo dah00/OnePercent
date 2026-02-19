@@ -1,18 +1,27 @@
 export const colors = {
-  primary: '#2FCFFF',
-  background: '#FFFFFF',
-  textPrimary: '#000000',
-  backgroundSecondary: '#F5F5F5',
-  lightGrey: "#E3E3E3",
-  border: '#D9D9D9',
-  button: "#9CA3AF",
-  darkGrey: "#525252",
-  accent: "#2563EB",
-  // accent: "#89CFF0",
-  beige: "#FFFFE3",
+  // Main surfaces
+  background: "#f2f2f7", 
+  backgroundSecondary: "#FFFFFF", 
+  textPrimary: "#000000",
+  textSecondary: "#8e8e93", 
+
+  // Borders & dividers
+  lightGrey: "#e5e5ea",
+  border: "#c6c6c8", 
+
+  // Interactive
+  button: "#FFFFFF", 
+  primary: "#2FCFFF", 
+  accent: "#007AFF",
+
+  // Grays
+  darkGrey: "#8e8e93",
   blueGray: "#6D8196",
-  success: "#00ba00",
-  error: "#EF4444",
+
+  // Semantic
+  success: "#34C759", 
+  error: "#FF3B30", 
+  beige: "#FFF9E6", 
 };
 
 // Export for CommonJS (tailwind.config.js)

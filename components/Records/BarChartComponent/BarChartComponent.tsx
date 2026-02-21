@@ -35,25 +35,28 @@ const BarChartComponent = () => {
       d.setDate(today.getDate() - i);
       const dateKey = formatDateToMMDDYY(d);
 
+      // Get the month
+      const month = dateKey.split("/")[0];
+
       // Count text and voice logs for this day
       const logsOnDay = messages.filter((m) => {
         const msgDate = new Date(m.created_at);
         return formatDateToMMDDYY(msgDate) === dateKey;
       });
 
-      const textCount = logsOnDay.filter(
+      const textCountWeek = logsOnDay.filter(
         (m) => m.message_type === "text",
       ).length;
       const voiceCount = logsOnDay.filter(
         (m) => m.message_type === "voice",
       ).length;
 
-      const totalCount = textCount + voiceCount;
+      const totalCount = textCountWeek + voiceCount;
 
       sevenDays.push({
         label: dateKey,
         stacks: [
-          { value: textCount, color: barColors.text },
+          { value: textCountWeek, color: barColors.text },
           { value: voiceCount, color: barColors.audio },
         ],
         topLabelComponent: () => (

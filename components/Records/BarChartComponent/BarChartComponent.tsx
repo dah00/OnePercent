@@ -1,6 +1,6 @@
 import { colors } from "@/constants/colors";
 import { useMessages } from "@/lib/hooks/useMessages";
-import { formatDateToMMDDYY } from "@/lib/utils/dateFormatters";
+import { formatDateToMMDDYY, getMonthShort } from "@/lib/utils/dateFormatters";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
@@ -19,6 +19,7 @@ const barColors = {
 
 const BarChartComponent = () => {
   const { messages } = useMessages();
+  const [chartData, setChartData] = useState<stackDataType[]>([]);
   const [weekData, setWeekData] = useState<stackDataType[]>([]);
   const [monthData, setMonthData] = useState<stackDataType[]>([]);
   const [yearData, setYearData] = useState<stackDataType[]>([]);
@@ -29,38 +30,63 @@ const BarChartComponent = () => {
 
     // Build 7 bars: one per day (6 days ago ... today)
     const sevenDays: stackDataType[] = [];
+    const sevenMonths: stackDataType[] = [];
+    const sevenYears: stackDataType[] = [];
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
+      const m = new Date(today)
       d.setDate(today.getDate() - i);
+      m.setDate(today.getMonth()-i)
       const dateKey = formatDateToMMDDYY(d);
+      const monthLabel = getMonthShort(m);
+      console.log(m)
 
       // Get the month
       const month = dateKey.split("/")[0];
+      const year = dateKey.split("/")[2];
 
-      // Count text and voice logs for this day
+      // Get text and voice logs for this day
       const logsOnDay = messages.filter((m) => {
         const msgDate = new Date(m.created_at);
         return formatDateToMMDDYY(msgDate) === dateKey;
       });
 
-      const textCountWeek = logsOnDay.filter(
+      // Get text and voice logs for this month
+      const logsOnMonth = messages.filter((m) => {
+        const msgDate = new Date(m.created_at);
+        const msgMonth = formatDateToMMDDYY(msgDate);
+        const msgYear = formatDateToMMDDYY(msgDate);
+        return month === msgMonth && year === msgYear;
+      });
+
+      const textWeekCount = logsOnDay.filter(
         (m) => m.message_type === "text",
       ).length;
-      const voiceCount = logsOnDay.filter(
+      const voiceWeekCount = logsOnDay.filter(
         (m) => m.message_type === "voice",
       ).length;
 
-      const totalCount = textCountWeek + voiceCount;
+      const textMonthCount = logsOnMonth.filter(
+        (m) => m.message_type === "text",
+      ).length;
+      const voiceMonthCount = logsOnMonth.filter(
+        (m) => m.message_type === "voice",
+      ).length;
+
+      const totalWeekCount = textWeekCount + voiceWeekCount;
+      const totalMonthCount = textMonthCount + voiceMonthCount;
 
       sevenDays.push({
         label: dateKey,
         stacks: [
-          { value: textCountWeek, color: barColors.text },
-          { value: voiceCount, color: barColors.audio },
+          { value: textWeekCount, color: barColors.text },
+          { value: voiceWeekCount, color: barColors.audio },
         ],
         topLabelComponent: () => (
-          <Text style={{ fontSize: 12, fontWeight: "600" }}>{totalCount}</Text>
+          <Text style={{ fontSize: 12, fontWeight: "600" }}>
+            {textWeekCount}
+          </Text>
         ),
         labelComponent: () => (
           <View className="items-start w-20 bg-border ">
@@ -68,7 +94,7 @@ const BarChartComponent = () => {
               style={{
                 fontSize: 12,
                 color: colors.textPrimary,
-                transform: [{ rotate: "-90deg" }],
+                transform: [{ rotate: "-85deg" }],
               }}
             >
               {dateKey}
@@ -76,9 +102,38 @@ const BarChartComponent = () => {
           </View>
         ),
       });
-    }
 
+      sevenMonths.push({
+        label: monthLabel,
+        stacks: [
+          { value: textMonthCount, color: barColors.text },
+          { value: voiceMonthCount, color: barColors.audio },
+        ],
+        topLabelComponent: () => (
+          <Text style={{ fontSize: 12, fontWeight: "600" }}>
+            {textMonthCount}
+          </Text>
+        ),
+        labelComponent: () => (
+          <View className="items-start w-20 bg-border ">
+            <Text
+              style={{
+                fontSize: 12,
+                color: colors.textPrimary,
+                transform: [{ rotate: "-80deg" }],
+              }}
+            >
+              {monthLabel}
+            </Text>
+          </View>
+        ),
+      });
+    }
     setWeekData(sevenDays);
+    setMonthData(sevenMonths)
+    // setYearData()
+
+    setChartData(sevenDays);
   }, [messages]);
 
   // Y-axis: maxValue = noOfSections * stepValue. Scale to fit data.
@@ -104,18 +159,39 @@ const BarChartComponent = () => {
     >
       <View className="w-[80%] self-center bg-background rounded-xl">
         <View className="flex-row justify-around gap-1 p-1">
-          <View className={`bg-white flex-1 items-center rounded-lg`}>
-            <Pressable>
+          <View
+            className={`${chartData === weekData ? "bg-white" : "bg-background"} flex-1 items-center rounded-lg`}
+          >
+            <Pressable
+              onPress={() => {
+                setChartData(weekData);
+              }}
+            >
               <Text className="text-xl">Week</Text>
             </Pressable>
           </View>
-          <View className="flex-1 items-center">
-            <Pressable className="">
+          <View
+            className={`${chartData === monthData ? "bg-white" : "bg-background"} flex-1 items-center rounded-lg`}
+          >
+            <Pressable
+              onPress={() => {
+                // console.log(monthData)
+                setChartData(monthData);
+              }}
+              className=""
+            >
               <Text className="text-xl">Month</Text>
             </Pressable>
           </View>
-          <View className="flex-1 items-center">
-            <Pressable className="">
+          <View
+            className={`${chartData === yearData ? "bg-white" : "bg-background"} flex-1 items-center rounded-lg`}
+          >
+            <Pressable
+              onPress={() => {
+                setChartData(yearData);
+              }}
+              className=""
+            >
               <Text className="text-xl">Year</Text>
             </Pressable>
           </View>
@@ -126,7 +202,7 @@ const BarChartComponent = () => {
         onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
       >
         <BarChart
-          stackData={weekData}
+          stackData={chartData}
           maxValue={noOfSections * stepValue}
           noOfSections={noOfSections}
           stepValue={stepValue}

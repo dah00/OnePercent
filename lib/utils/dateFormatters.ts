@@ -16,4 +16,8 @@ export const formatDateToMMDDYY = (date: Date): string => {
     day: "2-digit",
     year: "2-digit",
   });
-}
+};
+
+export const getMonthShort = (date: Date | string) => {
+  return new Date(date).toLocaleDateString("en-US", { month: "short" });
+};

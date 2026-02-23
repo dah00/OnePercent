@@ -4,10 +4,17 @@ import { formatDateToMMDDYY, getMonthShort } from "@/lib/utils/dateFormatters";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
+import Legend from "./Legend";
+
+type stackSegmentType = {
+  value: number;
+  color: string;
+  innerBarComponent?: () => React.ReactNode;
+};
 
 type stackDataType = {
   label: string;
-  stacks: Array<{ value: number; color: string }>;
+  stacks: Array<stackSegmentType>;
   topLabelComponent?: () => React.ReactNode;
   labelComponent?: () => React.ReactNode;
 };
@@ -35,12 +42,12 @@ const BarChartComponent = () => {
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
-      const m = new Date(today)
+      const m = new Date(today);
       d.setDate(today.getDate() - i);
-      m.setDate(today.getMonth()-i)
+      m.setDate(today.getMonth() - i);
       const dateKey = formatDateToMMDDYY(d);
       const monthLabel = getMonthShort(m);
-      console.log(m)
+      // console.log(m);
 
       // Get the month
       const month = dateKey.split("/")[0];
@@ -80,24 +87,51 @@ const BarChartComponent = () => {
       sevenDays.push({
         label: dateKey,
         stacks: [
-          { value: textWeekCount, color: barColors.text },
-          { value: voiceWeekCount, color: barColors.audio },
+          {
+            value: textWeekCount,
+            color: barColors.text,
+            innerBarComponent: () =>
+              textWeekCount > 0 ? (
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: colors.backgroundSecondary,
+                    alignSelf: "center",
+                  }}
+                >
+                  {textWeekCount}
+                </Text>
+              ) : null,
+          },
+          {
+            value: voiceWeekCount,
+            color: barColors.audio,
+            innerBarComponent: () =>
+              voiceWeekCount > 0 ? (
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: colors.backgroundSecondary,
+                    alignSelf: "center",
+                  }}
+                >
+                  {voiceWeekCount}
+                </Text>
+              ) : null,
+          },
         ],
-        topLabelComponent: () => (
-          <Text style={{ fontSize: 12, fontWeight: "600" }}>
-            {textWeekCount}
-          </Text>
-        ),
         labelComponent: () => (
-          <View className="items-start w-20 bg-border ">
+          <View className="items-center  ">
             <Text
               style={{
                 fontSize: 12,
                 color: colors.textPrimary,
-                transform: [{ rotate: "-85deg" }],
+                // transform: [{ rotate: "-25deg" }],
               }}
             >
-              {dateKey}
+              {dateKey.substring(0, 5)}
             </Text>
           </View>
         ),
@@ -106,14 +140,35 @@ const BarChartComponent = () => {
       sevenMonths.push({
         label: monthLabel,
         stacks: [
-          { value: textMonthCount, color: barColors.text },
-          { value: voiceMonthCount, color: barColors.audio },
+          {
+            value: textMonthCount,
+            color: barColors.text,
+            innerBarComponent: () =>
+              textMonthCount > 0 ? (
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontWeight: "600",
+                    color: colors.textPrimary,
+                  }}
+                >
+                  {textMonthCount}
+                </Text>
+              ) : null,
+          },
+          {
+            value: voiceMonthCount,
+            color: barColors.audio,
+            innerBarComponent: () =>
+              voiceMonthCount > 0 ? (
+                <Text
+                  style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}
+                >
+                  {voiceMonthCount}
+                </Text>
+              ) : null,
+          },
         ],
-        topLabelComponent: () => (
-          <Text style={{ fontSize: 12, fontWeight: "600" }}>
-            {textMonthCount}
-          </Text>
-        ),
         labelComponent: () => (
           <View className="items-start w-20 bg-border ">
             <Text
@@ -130,7 +185,7 @@ const BarChartComponent = () => {
       });
     }
     setWeekData(sevenDays);
-    setMonthData(sevenMonths)
+    setMonthData(sevenMonths);
     // setYearData()
 
     setChartData(sevenDays);
@@ -215,6 +270,9 @@ const BarChartComponent = () => {
           hideYAxisText={true}
           labelsExtraHeight={40}
         />
+        {/* <View className="flex-1 bg-slate-500"> */}
+          <Legend />
+        {/* </View> */}
       </View>
     </View>
   );

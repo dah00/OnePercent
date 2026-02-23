@@ -22,7 +22,7 @@ const Profile = () => {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1"
         >
-          <View className="h-52 rounded-xl bg-lightGrey" />
+          <View className="h-52 rounded-2xl bg-lightGrey" />
           <View
             className="absolute z-10 top-52  w-[120px] h-[120px] rounded-full border-2 border-background bg-lightGrey items-center justify-center"
             style={{

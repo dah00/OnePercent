@@ -1,206 +1,191 @@
 import { colors } from "@/constants/colors";
+import { MessageResponse } from "@/lib/api";
 import { useMessages } from "@/lib/hooks/useMessages";
-import { formatDateToMMDDYY, getMonthShort } from "@/lib/utils/dateFormatters";
-import React, { useEffect, useState } from "react";
+import {
+  getMonthShort,
+  isSameMonth,
+  toDateKey,
+} from "@/lib/utils/dateFormatters";
+import React, { useCallback, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import Legend from "./Legend";
 
-type stackSegmentType = {
+// ─── Types ─────────────────────────────────────────────────────────────────
+
+type StackSegment = {
   value: number;
   color: string;
   innerBarComponent?: () => React.ReactNode;
 };
 
-type stackDataType = {
+type StackDataItem = {
   label: string;
-  stacks: Array<stackSegmentType>;
-  topLabelComponent?: () => React.ReactNode;
+  stacks: StackSegment[];
   labelComponent?: () => React.ReactNode;
 };
 
-const barColors = {
+type ChartMode = "week" | "month" | "year";
+
+// ─── Constants ─────────────────────────────────────────────────────────────
+
+const BAR_COLORS = {
   text: colors.primary,
   audio: colors.success,
+} as const;
+
+const INNER_LABEL_STYLE = {
+  fontSize: 15,
+  fontWeight: "600" as const,
+  color: colors.backgroundSecondary,
+  alignSelf: "center" as const,
 };
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+/** Count messages by type for a given filter. */
+function countByType(
+  messages: MessageResponse[],
+  filter: (m: MessageResponse) => boolean,
+) {
+  const filtered = messages.filter(filter);
+  return {
+    text: filtered.filter((m) => m.message_type === "text").length,
+    audio: filtered.filter((m) => m.message_type === "voice").length,
+  };
+}
+
+/** Build a single stack segment with optional inner label. */
+function buildSegment(
+  value: number,
+  color: string,
+  showLabel: boolean,
+): StackSegment {
+  return {
+    value,
+    color,
+    innerBarComponent:
+      showLabel && value > 0
+        ? () => <Text style={INNER_LABEL_STYLE}>{value}</Text>
+        : undefined,
+  };
+}
+
+/** Build one bar's stack data from text/audio counts. */
+function buildStackItem(
+  label: string,
+  textCount: number,
+  audioCount: number,
+  labelRender: (label: string) => React.ReactNode,
+): StackDataItem {
+  return {
+    label,
+    stacks: [
+      buildSegment(textCount, BAR_COLORS.text, true),
+      buildSegment(audioCount, BAR_COLORS.audio, true),
+    ],
+    labelComponent: () => labelRender(label),
+  };
+}
+
+// ─── Component ─────────────────────────────────────────────────────────────
 
 const BarChartComponent = () => {
   const { messages } = useMessages();
-  const [chartData, setChartData] = useState<stackDataType[]>([]);
-  const [weekData, setWeekData] = useState<stackDataType[]>([]);
-  const [monthData, setMonthData] = useState<stackDataType[]>([]);
-  const [yearData, setYearData] = useState<stackDataType[]>([]);
+  const [mode, setMode] = useState<ChartMode>("week");
   const [chartWidth, setChartWidth] = useState(0);
 
-  useEffect(() => {
+  // Build week data: 7 bars (6 days ago ... today)
+  const weekData = useMemo(() => {
     const today = new Date();
-
-    // Build 7 bars: one per day (6 days ago ... today)
-    const sevenDays: stackDataType[] = [];
-    const sevenMonths: stackDataType[] = [];
-    const sevenYears: stackDataType[] = [];
+    const result: StackDataItem[] = [];
 
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
-      const m = new Date(today);
       d.setDate(today.getDate() - i);
-      m.setDate(today.getMonth() - i);
-      const dateKey = formatDateToMMDDYY(d);
-      const monthLabel = getMonthShort(m);
-      // console.log(m);
+      const dateKey = toDateKey(d);
 
-      // Get the month
-      const month = dateKey.split("/")[0];
-      const year = dateKey.split("/")[2];
-
-      // Get text and voice logs for this day
-      const logsOnDay = messages.filter((m) => {
+      const { text, audio } = countByType(messages, (m) => {
         const msgDate = new Date(m.created_at);
-        return formatDateToMMDDYY(msgDate) === dateKey;
+        return toDateKey(msgDate) === dateKey;
       });
 
-      // Get text and voice logs for this month
-      const logsOnMonth = messages.filter((m) => {
-        const msgDate = new Date(m.created_at);
-        const msgMonth = formatDateToMMDDYY(msgDate);
-        const msgYear = formatDateToMMDDYY(msgDate);
-        return month === msgMonth && year === msgYear;
-      });
-
-      const textWeekCount = logsOnDay.filter(
-        (m) => m.message_type === "text",
-      ).length;
-      const voiceWeekCount = logsOnDay.filter(
-        (m) => m.message_type === "voice",
-      ).length;
-
-      const textMonthCount = logsOnMonth.filter(
-        (m) => m.message_type === "text",
-      ).length;
-      const voiceMonthCount = logsOnMonth.filter(
-        (m) => m.message_type === "voice",
-      ).length;
-
-      const totalWeekCount = textWeekCount + voiceWeekCount;
-      const totalMonthCount = textMonthCount + voiceMonthCount;
-
-      sevenDays.push({
-        label: dateKey,
-        stacks: [
-          {
-            value: textWeekCount,
-            color: barColors.text,
-            innerBarComponent: () =>
-              textWeekCount > 0 ? (
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: colors.backgroundSecondary,
-                    alignSelf: "center",
-                  }}
-                >
-                  {textWeekCount}
-                </Text>
-              ) : null,
-          },
-          {
-            value: voiceWeekCount,
-            color: barColors.audio,
-            innerBarComponent: () =>
-              voiceWeekCount > 0 ? (
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: colors.backgroundSecondary,
-                    alignSelf: "center",
-                  }}
-                >
-                  {voiceWeekCount}
-                </Text>
-              ) : null,
-          },
-        ],
-        labelComponent: () => (
-          <View className="items-center  ">
-            <Text
-              style={{
-                fontSize: 12,
-                color: colors.textPrimary,
-                // transform: [{ rotate: "-25deg" }],
-              }}
-            >
-              {dateKey.substring(0, 5)}
-            </Text>
-          </View>
-        ),
-      });
-
-      sevenMonths.push({
-        label: monthLabel,
-        stacks: [
-          {
-            value: textMonthCount,
-            color: barColors.text,
-            innerBarComponent: () =>
-              textMonthCount > 0 ? (
-                <Text
-                  style={{
-                    fontSize: 11,
-                    fontWeight: "600",
-                    color: colors.textPrimary,
-                  }}
-                >
-                  {textMonthCount}
-                </Text>
-              ) : null,
-          },
-          {
-            value: voiceMonthCount,
-            color: barColors.audio,
-            innerBarComponent: () =>
-              voiceMonthCount > 0 ? (
-                <Text
-                  style={{ fontSize: 11, fontWeight: "600", color: "#fff" }}
-                >
-                  {voiceMonthCount}
-                </Text>
-              ) : null,
-          },
-        ],
-        labelComponent: () => (
-          <View className="items-start w-20 bg-border ">
-            <Text
-              style={{
-                fontSize: 12,
-                color: colors.textPrimary,
-                transform: [{ rotate: "-80deg" }],
-              }}
-            >
-              {monthLabel}
-            </Text>
-          </View>
-        ),
-      });
+      result.push(
+        buildStackItem(dateKey, text, audio, (lbl) => {
+          const [, m, d] = lbl.split("-");
+          return (
+            <View className="items-center">
+              <Text style={{ fontSize: 12, color: colors.textPrimary }}>
+                {m}/{d}
+              </Text>
+            </View>
+          );
+        }),
+      );
     }
-    setWeekData(sevenDays);
-    setMonthData(sevenMonths);
-    // setYearData()
-
-    setChartData(sevenDays);
+    return result;
   }, [messages]);
 
-  // Y-axis: maxValue = noOfSections * stepValue. Scale to fit data.
-  const maxBarTotal =
-    weekData.length > 0
-      ? Math.max(
-          ...weekData.map((d) => d.stacks.reduce((sum, s) => sum + s.value, 0)),
-        )
-      : 0;
-  const maxValue = Math.max(4, maxBarTotal);
-  const noOfSections = 4;
-  const stepValue = Math.ceil(maxValue / noOfSections);
+  // Build month data: 7 bars (6 months ago ... this month)
+  const monthData = useMemo(() => {
+    const today = new Date();
+    const result: StackDataItem[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const m = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthLabel = getMonthShort(m);
+
+      const { text, audio } = countByType(messages, (msg) => {
+        const msgDate = new Date(msg.created_at);
+        return isSameMonth(msgDate, m);
+      });
+
+      result.push(
+        buildStackItem(monthLabel, text, audio, (lbl) => (
+          <View className="items-center">
+            <Text style={{ fontSize: 12, color: colors.textPrimary }}>
+              {lbl}
+            </Text>
+          </View>
+        )),
+      );
+    }
+    return result;
+  }, [messages]);
+
+  const chartData =
+    mode === "week" ? weekData : mode === "month" ? monthData : monthData; // TODO: yearData
+
+  const { maxValue, noOfSections, stepValue } = useMemo(() => {
+    const maxBarTotal =
+      chartData.length > 0
+        ? Math.max(
+            ...chartData.map((d) =>
+              d.stacks.reduce((sum, s) => sum + s.value, 0),
+            ),
+          )
+        : 0;
+    const max = Math.max(4, maxBarTotal);
+    const sections = 4;
+    const step = Math.ceil(max / sections);
+    return {
+      maxValue: sections * step,
+      noOfSections: sections,
+      stepValue: step,
+    };
+  }, [chartData]);
+
+  const handleLayout = useCallback(
+    (e: { nativeEvent: { layout: { width: number } } }) =>
+      setChartWidth(e.nativeEvent.layout.width),
+    [],
+  );
+
+  const MODES: { id: ChartMode; label: string }[] = [
+    { id: "week", label: "Week" },
+    { id: "month", label: "Month" },
+    { id: "year", label: "Year" },
+  ];
 
   return (
     <View
@@ -212,53 +197,29 @@ const BarChartComponent = () => {
         shadowRadius: 24,
       }}
     >
+      {/* Mode tabs */}
       <View className="w-[80%] self-center bg-background rounded-xl">
         <View className="flex-row justify-around gap-1 p-1">
-          <View
-            className={`${chartData === weekData ? "bg-white" : "bg-background"} flex-1 items-center rounded-lg`}
-          >
-            <Pressable
-              onPress={() => {
-                setChartData(weekData);
-              }}
+          {MODES.map(({ id, label }) => (
+            <View
+              key={id}
+              className={`${
+                mode === id ? "bg-white" : "bg-background"
+              } flex-1 items-center rounded-lg`}
             >
-              <Text className="text-xl">Week</Text>
-            </Pressable>
-          </View>
-          <View
-            className={`${chartData === monthData ? "bg-white" : "bg-background"} flex-1 items-center rounded-lg`}
-          >
-            <Pressable
-              onPress={() => {
-                // console.log(monthData)
-                setChartData(monthData);
-              }}
-              className=""
-            >
-              <Text className="text-xl">Month</Text>
-            </Pressable>
-          </View>
-          <View
-            className={`${chartData === yearData ? "bg-white" : "bg-background"} flex-1 items-center rounded-lg`}
-          >
-            <Pressable
-              onPress={() => {
-                setChartData(yearData);
-              }}
-              className=""
-            >
-              <Text className="text-xl">Year</Text>
-            </Pressable>
-          </View>
+              <Pressable onPress={() => setMode(id)}>
+                <Text className="text-xl">{label}</Text>
+              </Pressable>
+            </View>
+          ))}
         </View>
       </View>
-      <View
-        style={{ width: "100%", flex: 1 }}
-        onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
-      >
+
+      {/* Chart */}
+      <View style={{ width: "100%", flex: 1 }} onLayout={handleLayout}>
         <BarChart
           stackData={chartData}
-          maxValue={noOfSections * stepValue}
+          maxValue={maxValue}
           noOfSections={noOfSections}
           stepValue={stepValue}
           barBorderRadius={8}
@@ -270,9 +231,7 @@ const BarChartComponent = () => {
           hideYAxisText={true}
           labelsExtraHeight={40}
         />
-        {/* <View className="flex-1 bg-slate-500"> */}
-          <Legend />
-        {/* </View> */}
+        <Legend />
       </View>
     </View>
   );

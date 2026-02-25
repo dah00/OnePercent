@@ -1,9 +1,11 @@
 # backend/schemas.py
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from enum import Enum
 from pydantic import BaseModel, Field
 
+
+# ----------------------- MESSAGE -------------------------------------
 
 class MessageType(str, Enum):
     TEXT = "text"
@@ -36,6 +38,16 @@ class MessageResponse(MessageBase):
 
     class Config:
         from_attributes = True  # allows returning SQLAlchemy objects directly
+
+class MessageListResponse(BaseModel):
+    items: List[MessageResponse]
+    next_cursor: Optional[str] = None
+    
+    class config:
+        from_attributes = True
+
+
+# ----------------------- USER -------------------------------------
 
 class UserBase(BaseModel):
     email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')

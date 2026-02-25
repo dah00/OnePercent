@@ -143,7 +143,7 @@ const BarChartComponent = () => {
       result.push(
         buildStackItem(monthLabel, text, audio, (lbl) => (
           <View className="items-center">
-            <Text style={{ fontSize: 12, color: colors.textPrimary }}>
+            <Text style={{ fontSize: 14, color: colors.textPrimary }}>
               {lbl}
             </Text>
           </View>
@@ -159,21 +159,18 @@ const BarChartComponent = () => {
     const result: StackDataItem[] = [];
 
     for (let i = 6; i >= 0; i--) {
-
-      const y = today.getFullYear()-i
-      const yearLabel = y.toString()
-      // console.log(today.getFullYear()-i)
+      const y = today.getFullYear() - i;
+      const yearLabel = y.toString();
 
       const { text, audio } = countByType(messages, (msg) => {
         const msgDate = new Date(msg.created_at);
-        return msgDate.getFullYear().toString() === yearLabel
-        // return isSameMonth(msgDate, m);
+        return msgDate.getFullYear().toString() === yearLabel;
       });
 
       result.push(
         buildStackItem(yearLabel, text, audio, (lbl) => (
           <View className="items-center">
-            <Text style={{ fontSize: 12, color: colors.textPrimary }}>
+            <Text style={{ fontSize: 13, color: colors.textPrimary }}>
               {lbl}
             </Text>
           </View>
@@ -183,9 +180,8 @@ const BarChartComponent = () => {
     return result;
   }, [messages]);
 
-
   const chartData =
-    mode === "week" ? weekData : mode === "month" ? monthData : yearData; // TODO: yearData
+    mode === "week" ? weekData : mode === "month" ? monthData : yearData;
 
   const { maxValue, noOfSections, stepValue } = useMemo(() => {
     const maxBarTotal =

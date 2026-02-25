@@ -1,9 +1,9 @@
 import BarChartComponent from "@/components/Records/BarChartComponent";
+import LogsHistory from "@/components/Records/LogsHistory";
 import React from "react";
 import {
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
+  ScrollView,
   Text,
   TouchableWithoutFeedback,
   View,
@@ -15,25 +15,22 @@ const Records = () => {
     <SafeAreaView className="flex-1 bg-background " edges={[]}>
       {/* Back Button */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
-        >
+        <View>
           {/* Header */}
-          <View className="bg-backgroundSecondary pt-24 pb-6 pl-6 mb-4">
-            <Text className="text-3xl">Records</Text>
+          <View className="absolute z-10 h-32 w-[100%] justify-end bg-backgroundSecondary">
+            <Text className="text-3xl ml-6 mb-2">Records</Text>
           </View>
 
-          {/* Bar Chart */}
-          <View className="gap-4 px-6">
-            {/* <View> */}
-            <BarChartComponent />
-            {/* </View> */}
-            <View>
-              <Text>Logs History</Text>
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            {/* Bar Chart */}
+            <View className="gap-4 px-6 mt-40">
+              <BarChartComponent />
+              {/* Logs History */}
+              <Text className="text-xl">Logs History</Text>
+              <LogsHistory />
             </View>
-          </View>
-        </KeyboardAvoidingView>
+          </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
     </SafeAreaView>
   );

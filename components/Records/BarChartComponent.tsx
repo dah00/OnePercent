@@ -153,8 +153,39 @@ const BarChartComponent = () => {
     return result;
   }, [messages]);
 
+  // Build year data: 7 bars (6 years ago ... this year)
+  const yearData = useMemo(() => {
+    const today = new Date();
+    const result: StackDataItem[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+
+      const y = today.getFullYear()-i
+      const yearLabel = y.toString()
+      // console.log(today.getFullYear()-i)
+
+      const { text, audio } = countByType(messages, (msg) => {
+        const msgDate = new Date(msg.created_at);
+        return msgDate.getFullYear().toString() === yearLabel
+        // return isSameMonth(msgDate, m);
+      });
+
+      result.push(
+        buildStackItem(yearLabel, text, audio, (lbl) => (
+          <View className="items-center">
+            <Text style={{ fontSize: 12, color: colors.textPrimary }}>
+              {lbl}
+            </Text>
+          </View>
+        )),
+      );
+    }
+    return result;
+  }, [messages]);
+
+
   const chartData =
-    mode === "week" ? weekData : mode === "month" ? monthData : monthData; // TODO: yearData
+    mode === "week" ? weekData : mode === "month" ? monthData : yearData; // TODO: yearData
 
   const { maxValue, noOfSections, stepValue } = useMemo(() => {
     const maxBarTotal =

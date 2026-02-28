@@ -190,6 +190,64 @@ def get_message_stats(
         )
 
 
+@app.get('/api/messages/history', response_model=MessageListResponse)
+def list_message_history(
+    type_filter: str = Query(default="all", description="Filter: all, text, or voice"),
+    after: Optional[str] = Query(default=None, description="ISO date string - only messages on/after this date"),
+    limit: int = Query(default=25, ge=1, le=50, description="Max items per page"),
+    cursor: Optional[str] = Query(default=None, description="Cursor for pagination (last item's id)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try: 
+        # Base query: only this user's messages, newst first 
+        query = db.query(Message).filter(Message.user_id == current_user.id).order_by(Message.created_at.desc())
+
+        # Filter by type (all | text | voice)
+        if type_filter == "text":
+            query = query.filter(Message.message_type == MessageType.TEXT)
+        elif type_filter == "voice":
+            query = query.filter(Message.message_type == MessageType.VOICE)
+        # "all" = no filter
+
+        # Filter by date: only messages created on or after this date
+        if after: 
+            try:
+                after_dt = datetime.fromisoformat(after.replace("Z", "+00:00"))
+                if after_dt.tzinfo is None:
+                    after_dt = after_dt.replace(tzinfo=timezone.utc)
+                query = query.filter(Message.created_at >= after_dt)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid 'after' date format. Use ISO format. Use ISO format (e.g. 2025-02-04T00:00:00Z)")
+            
+        if cursor:
+            try:
+                cursor_id = int(cursor)
+                query = query.filter(Message.id < cursor_id)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid cursor")
+            
+        # Fetch limit+1 to know if there are more 
+        rows = query.limit(limit+1).all()
+
+        if(len(rows) > limit):
+            items = rows[:limit]
+            next_cursor = str(items[-1].id)
+        else:
+            items = rows
+            next_cursor = None
+        return MessageListResponse(items=items, next_cursor=next_cursor)
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch messages: {str(e)}"
+        )
+
+
+
 @app.get("/api/messages/{message_id}", response_model=MessageResponse)
 def get_message(
     message_id: int,
@@ -389,63 +447,6 @@ async def get_voice_file(
             detail=f"Failed to retrieve voice file: {str(e)}"
         )
     
-
-@app.get('api/messages/history', response_modeul=MessageListResponse)
-def list_message_history(
-    type_filter: str = Query(default="all", description="Filter: all, text, or voice"),
-    after: Optional[str] = Query(default=None, description="ISO date string - only messages on/after this date"),
-    limit: int = Query(defaul=25, ge=1, le=50, description="Max items per page"),
-    cursor: Optional[str] = Query(default=None, description="Cursor for pagination (last item's id)"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    try: 
-        # Base query: only this user's messages, newst first 
-        query = db.query(Message).filter(Message.user_id == current_user.id).order_by(Message.created_at.desc())
-
-        # Filter by type (all | text | voice)
-        if type_filter == "text":
-            query = query.filter(Message.message_type == MessageType.TEXT)
-        elif type_filter == "voice":
-            query = query.filter(Message.message_type == MessageType.VOICE)
-        # "all" = no filter
-
-        # Filter by date: only messages created on or after this date
-        if after: 
-            try:
-                after_dt = datetime.fromisoformat(after.replace("Z", "+00:00"))
-                if after_dt.tzinfo is None:
-                    after_dt = after_dt.replace(tzinfo=timezone.utc)
-                query = query.filter(Message.created_at >= after_dt)
-            except ValueError:
-                raise HTTPException(status_code=400, detail="Invalid 'after' date format. Use ISO format. Use ISO format (e.g. 2025-02-04T00:00:00Z)")
-            
-        if cursor:
-            try:
-                cursor_id = int(cursor)
-                query = query.filter(Message.id < cursor_id)
-            except ValueError:
-                raise HTTPException(status_code=400, detail="Invalid cursor")
-            
-        # Fetch limit+1 to know if ther are more 
-        rows = query.limit(limit+1).all()
-
-        if(len(rows) > limit):
-            items = rows[:limit]
-            next_cursor = str(items[-1].id)
-        else:
-            items = rows
-            next_cursor = None
-        return MessageListResponse(items=items, next_cursor=next_cursor)
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch messages: {str(e)}"
-        )
-
 
 ############################# AUTHENTICATION ############################
 

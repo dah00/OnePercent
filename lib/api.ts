@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TOKEN_KEY = "onepercent_token";
 const API_BASE_URL = __DEV__
-  ? "http://10.1.10.81:8000"
+  ? "http://10.0.0.237:8000"
   : "https://your-deployed-api.com";
 
 // Get the API base URL dynamically based on the current network
@@ -76,6 +76,18 @@ export interface MessageResponse extends MessagePayload {
   created_at: string;
   updated_at?: string | null;
   voice_file_path?: string | null;
+}
+
+export interface MessageListResponse {
+  items: MessageResponse[];
+  next_cursor: string | null;
+}
+
+export interface MessagesHistoryParams {
+  type_filter?: "all" | "text" | "voice";
+  after?: string;
+  limit?: number;
+  cursor?: string;
 }
 
 export interface VoiceMessagePayload {
@@ -265,6 +277,24 @@ export async function createMessage(
     body: JSON.stringify(payload),
   });
 }
+
+// Get messages history
+export async function getMessagesHistory(
+  params: MessagesHistoryParams = {}
+): Promise<ApiResponse<MessageListResponse>> {
+  const searchParams = new URLSearchParams()
+  
+  if(params.type_filter) searchParams.set("type_filter", params.type_filter);
+  if(params.after) searchParams.set("after", params.after);
+  if(params.limit) searchParams.set("limit", String(params.limit));
+  if(params.cursor) searchParams.set("cursor", params.cursor);
+
+  const queryString = searchParams.toString();
+  const endpoint = `/api/messages/history${queryString ? `?${queryString}` : ""}`;
+
+  return apiRequest<MessageListResponse>(endpoint);
+}
+
 
 // Update message
 export async function updateMessage(

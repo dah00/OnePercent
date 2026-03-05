@@ -5,7 +5,7 @@ import { icons } from "@/constants/icons";
 import { useEntryOverlay } from "@/lib/contexts/EntryOverlayContext";
 import { useMessages } from "@/lib/hooks/useMessages";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Image,
   Keyboard,
@@ -23,9 +23,7 @@ const Home = () => {
   const { showEntryOption, setShowEntryOption } = useEntryOverlay();
   const { messages, isLoading, error, reload, createMessage } = useMessages();
 
-  useEffect(() => {
-    // filter messages to the last 7 days
-  }, []);
+  // TODO: Fix issue: log doesn't shows immediately on the streak right after entry. Same issue in the recording
 
   return (
     <SafeAreaView className="flex-1 bg-secondary " edges={[]}>

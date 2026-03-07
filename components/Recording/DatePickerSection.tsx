@@ -88,7 +88,7 @@ const DatePickerSection: React.FC<DatePickerSectionProps> = ({
             <Pressable
               onPress={handleCancelDate}
               className="px-6 py-2 rounded-md"
-              style={{ backgroundColor: colors.secondary }}
+              style={{ backgroundColor: colors.lightGrey }}
             >
               <Text className="text-base" style={{ color: colors.textPrimary }}>
                 Cancel

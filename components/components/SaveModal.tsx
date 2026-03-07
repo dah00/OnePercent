@@ -39,8 +39,10 @@ const SaveModal = ({ showSaveModal, setShowSaveModal }: SaveModalProps) => {
         type: "success",
         text1: "+1% Better",
         text2: "New log saved successfully",
+        visibilityTime: 7000,
+        onPress: () => Toast.hide(),
       });
-      // Navigate after Toast is visible so it shows before the transition
+      setTimeout(() => Toast.hide(), 7000);
       setTimeout(() => {
         router.replace("/(tabs)/Home");
       }, 500);
@@ -49,7 +51,10 @@ const SaveModal = ({ showSaveModal, setShowSaveModal }: SaveModalProps) => {
         type: "error",
         text1: "Save failed",
         text2: result.error ?? "Please try again.",
+        visibilityTime: 7000,
+        onPress: () => Toast.hide(),
       });
+      setTimeout(() => Toast.hide(), 7000);
       closeModal();
     }
   };

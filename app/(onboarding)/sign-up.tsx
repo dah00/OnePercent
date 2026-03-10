@@ -3,7 +3,7 @@ import Button from "@/components/Button";
 import TextField from "@/components/TextField";
 import { colors } from "@/constants/colors";
 import { useAuth } from "@/lib/AuthContext";
-import Checkbox from "expo-checkbox";
+import Checkbox from "@/components/Checkbox";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -121,10 +121,8 @@ const SignUp = () => {
             <View className="flex-row items-center gap-4">
               <Checkbox
                 value={isChecked}
-                onValueChange={(newValue) => {
-                  setIsChecked(newValue);
-                }}
-                color={isChecked ? colors.accent : colors.button}
+                onValueChange={setIsChecked}
+                color={colors.primary}
               />
               <Text>I agree to the terms & conditions</Text>
             </View>

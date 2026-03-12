@@ -51,6 +51,7 @@ class MessageListResponse(BaseModel):
 
 class UserBase(BaseModel):
     email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')
+    full_name: str = Field(..., max_length=90)
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=72)  
@@ -59,6 +60,7 @@ class UserResponse(UserBase):
     id: int
     created_at: datetime
     is_active: bool
+
 
     class Config:
         from_attributes = True

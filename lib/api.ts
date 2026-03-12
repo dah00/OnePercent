@@ -104,6 +104,7 @@ export interface VoiceMessagePayload {
 export interface UserResponse {
   id: number;
   email: string;
+  full_name: string;
   created_at: string;
   is_active: boolean;
 }
@@ -122,6 +123,7 @@ export interface MessageStatsResponse {
 export async function registerUser(payload: {
   email: string;
   password: string;
+  full_name: string;
 }): Promise<ApiResponse<AuthResponse>> {
   return apiRequest<AuthResponse>(
     "/api/auth/register",

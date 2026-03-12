@@ -1,9 +1,9 @@
 import BackButton from "@/components/BackButton";
 import Button from "@/components/Button";
+import Checkbox from "@/components/Checkbox";
 import TextField from "@/components/TextField";
 import { colors } from "@/constants/colors";
 import { useAuth } from "@/lib/AuthContext";
-import Checkbox from "@/components/Checkbox";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -59,7 +59,7 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      await register(trimmedEmail, trimmedPassword);
+      await register(trimmedEmail, trimmedPassword, trimmedFullName);
       router.replace("/(tabs)/Home");
     } catch (error) {
       Alert.alert(

@@ -6,8 +6,36 @@ import React from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+function getInitials(fullName?: string, email?: string): string {
+  if (fullName?.trim()) {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return fullName.slice(0, 2).toUpperCase();
+  }
+  if (email?.trim()) {
+    const local = email.split("@")[0];
+    return local.slice(0, 2).toUpperCase();
+  }
+  return "?";
+}
+
+function formatJoinedDate(createdAt?: string): string {
+  if (!createdAt) return "";
+  try {
+    const date = new Date(createdAt);
+    return `Joined ${date.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`;
+  } catch {
+    return "";
+  }
+}
+
 const Profile = () => {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const initials = getInitials(user?.full_name, user?.email);
+  const joinedDate = formatJoinedDate(user?.created_at);
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={[]}>
       <ScrollView
@@ -25,18 +53,18 @@ const Profile = () => {
         >
           {/* TODO: Replace with user's profile image */}
           <Text className="text-4xl font-instrument text-textSecondary">
-            DV
+            {initials}
           </Text>
         </View>
 
-        {/* Name & join date - TODO: Replace with user data from AuthContext */}
+        {/* Name & join date */}
         <View className="pt-24 px-6 pb-2 items-center gap-2 bg-backgroundSecondary rounded-2xl mx-4 min-h-32">
           <Text className="text-3xl font-instrument text-textPrimary">
-            Dah Velo
+            {user?.full_name ?? "User"}
           </Text>
-          <Text className="text-textSecondary text-base">
-            Joined March 2023
-          </Text>
+          {joinedDate ? (
+            <Text className="text-textSecondary text-base">{joinedDate}</Text>
+          ) : null}
         </View>
 
         {/* Profile Body */}
@@ -58,7 +86,7 @@ const Profile = () => {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              dah.velo@gmail.com
+              {user?.email ?? ""}
             </Text>
           </View>
 

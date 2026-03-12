@@ -51,7 +51,6 @@ const Profile = () => {
             marginLeft: -45,
           }}
         >
-          {/* TODO: Replace with user's profile image */}
           <Text className="text-4xl font-instrument text-textSecondary">
             {initials}
           </Text>

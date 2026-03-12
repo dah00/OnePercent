@@ -2,6 +2,7 @@ import EntryFloatingActionButton from "@/components/components/EntryFloatingActi
 import Streak from "@/components/Home/Streak";
 import { colors } from "@/constants/colors";
 import { icons } from "@/constants/icons";
+import { useAuth } from "@/lib/AuthContext";
 import { useEntryOverlay } from "@/lib/contexts/EntryOverlayContext";
 import { useMessages } from "@/lib/hooks/useMessages";
 import { router } from "expo-router";
@@ -18,10 +19,23 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+function getFirstName(fullName?: string) {
+  const trimmed = fullName?.trim();
+  if (trimmed) {
+    const firstName = trimmed.split(/\s+/)[0];
+    if (firstName) {
+      return firstName[0].toUpperCase() + firstName.slice(1).toLowerCase();
+    }
+  }
+  return "there";
+}
+
 const Home = () => {
   const [backendMessage, setBackendMessage] = useState<string>("");
   const { showEntryOption, setShowEntryOption } = useEntryOverlay();
   const { messages, isLoading, error, reload, createMessage } = useMessages();
+  const { user } = useAuth();
+  const firstName = getFirstName(user?.full_name);
 
   // TODO: Fix issue: log doesn't shows immediately on the streak right after entry. Same issue in the recording
 
@@ -37,7 +51,7 @@ const Home = () => {
           <View className="mb-10 bg-darkGrey h-56 rounded-b-[38px]">
             <View className="flex-row justify-between px-6 pt-32 h-full">
               <Text className="color-backgroundSecondary font-instrument text-4xl">
-                Hello, <Text className="color-primary"> Rio</Text>
+                Hello <Text className="color-primary">{firstName}</Text>
               </Text>
               <Pressable onPress={() => router.push("/Profile")}>
                 <Image

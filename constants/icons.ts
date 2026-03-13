@@ -4,6 +4,7 @@ import calendar from "@/assets/icons/calendar.png";
 import check from "@/assets/icons/check.png";
 import close_cross from "@/assets/icons/close-x-cross.png";
 import comment from "@/assets/icons/comment.png";
+import email from "@/assets/icons/email.png";
 import failed_cross from "@/assets/icons/failed-red-cross.png";
 import records from "@/assets/icons/folder.png";
 import home from "@/assets/icons/home.png";
@@ -34,4 +35,5 @@ export const icons = {
   close_cross,
   arrow_down,
   arrow_up,
+  email,
 };

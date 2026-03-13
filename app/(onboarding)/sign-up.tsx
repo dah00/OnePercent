@@ -1,9 +1,9 @@
 import BackButton from "@/components/BackButton";
 import Button from "@/components/Button";
+import Checkbox from "@/components/Checkbox";
 import TextField from "@/components/TextField";
 import { colors } from "@/constants/colors";
 import { useAuth } from "@/lib/AuthContext";
-import Checkbox from "@/components/Checkbox";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -59,7 +59,7 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      await register(trimmedEmail, trimmedPassword);
+      await register(trimmedEmail, trimmedPassword, trimmedFullName);
       router.replace("/(tabs)/Home");
     } catch (error) {
       Alert.alert(
@@ -121,10 +121,8 @@ const SignUp = () => {
             <View className="flex-row items-center gap-4">
               <Checkbox
                 value={isChecked}
-                onValueChange={(newValue) => {
-                  setIsChecked(newValue);
-                }}
-                color={isChecked ? colors.accent : colors.button}
+                onValueChange={setIsChecked}
+                color={colors.primary}
               />
               <Text>I agree to the terms & conditions</Text>
             </View>

@@ -3,14 +3,16 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type AppUser = {
   email: string;
-  id?: number; 
+  id?: number;
+  full_name?: string;
+  created_at?: string;
 };
 
 type AuthContextValue = {
   user: AppUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, full_name: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -35,9 +37,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Fetch actual user data from backend
           const response = await getCurrentUser();
           if (response.success && response.data) {
-            setUser({ 
-              email: response.data.email, 
-              id: response.data.id 
+            setUser({
+              email: response.data.email,
+              id: response.data.id,
+              full_name: response.data.full_name,
+              created_at: response.data.created_at,
             });
           } else {
             // Token invalid, clear it
@@ -71,17 +75,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Fetch user data
     const userResponse = await getCurrentUser();
     if (userResponse.success && userResponse.data) {
-      setUser({ 
-        email: userResponse.data.email, 
-        id: userResponse.data.id 
+      setUser({
+        email: userResponse.data.email,
+        id: userResponse.data.id,
+        full_name: userResponse.data.full_name,
+        created_at: userResponse.data.created_at,
       });
     } else {
-      setUser({ email }); // Fallback to email only
+      setUser({ email });
     }
   };
 
-  const register = async (email: string, password: string) => {
-    const response = await registerUser({ email, password });
+  const register = async (email: string, password: string, full_name: string) => {
+    const response = await registerUser({ email, password, full_name });
     
     if (!response.success || !response.data) {
       throw new Error(response.error || "Registration failed");
@@ -93,12 +99,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Fetch user data
     const userResponse = await getCurrentUser();
     if (userResponse.success && userResponse.data) {
-      setUser({ 
-        email: userResponse.data.email, 
-        id: userResponse.data.id 
+      setUser({
+        email: userResponse.data.email,
+        id: userResponse.data.id,
+        full_name: userResponse.data.full_name,
+        created_at: userResponse.data.created_at,
       });
     } else {
-      setUser({ email }); // Fallback to email only
+      setUser({ email, full_name });
     }
   };
 

@@ -1,9 +1,8 @@
-import { colors } from "@/constants/colors";
-import { icons } from "@/constants/icons";
-import { toDateKey } from "@/lib/utils/dateFormatters";
-import React, { useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
-import DatePickerSection from "../Recording/DatePickerSection";
+import { colors } from "@/constants/colors"
+import { icons } from "@/constants/icons"
+import DateTimePicker from "@react-native-community/datetimepicker"
+import React, { useState } from "react"
+import { Image, Pressable, Text, View } from "react-native"
 
 const mockData = [
   {
@@ -24,11 +23,11 @@ const mockData = [
     updated_at: null,
     voice_file_path: null,
   },
-];
+]
 
 const LogsHistory = () => {
-  const [afterDate, setAfterDate] = useState<Date | null>();
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [afterDate, setAfterDate] = useState<Date | null>(new Date())
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
   return (
     <View
       className="bg-backgroundSecondary rounded-2xl p-4"
@@ -44,29 +43,32 @@ const LogsHistory = () => {
         <Text>After: </Text>
         <Pressable
           onPress={() => setShowDatePicker(!showDatePicker)}
-          className="flex-row p-2 gap-2 bg-background items-center"
+          className="flex-row p-2 gap-2 items-center"
           style={{
             borderColor: colors.background,
             borderRadius: 10,
+            backgroundColor: "#c7c7cc",
           }}
         >
           <Image source={icons.calendar} className="h-4 w-4" />
-          <Text>{afterDate ? toDateKey(afterDate) : "All time"}</Text>
+
+          {/* scale: 0.9 = smaller, 1.1 = larger (DateTimePicker has no fontSize prop) */}
+          <View style={{ transform: [{ scale: 0.9 }] }}>
+            <DateTimePicker
+              value={afterDate || new Date()}
+              mode="date"
+              display="default"
+            />
+          </View>
           {showDatePicker ? (
             <Image source={icons.arrow_up} className="h-6 w-6" />
           ) : (
             <Image source={icons.arrow_down} className="h-6 w-6" />
           )}
         </Pressable>
-        {showDatePicker && (
-          <DatePickerSection
-            scheduledDate={afterDate ?? null}
-            onDateChange={(date) => setAfterDate(date)}
-          />
-        )}
       </View>
     </View>
-  );
-};
+  )
+}
 
-export default LogsHistory;
+export default LogsHistory

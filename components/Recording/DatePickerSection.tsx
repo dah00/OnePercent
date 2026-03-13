@@ -1,41 +1,41 @@
-import { colors } from "@/constants/colors";
-import { icons } from "@/constants/icons";
-import { formatDateTime } from "@/lib/utils/dateFormatters";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import React, { useState } from "react";
-import { Image, Platform, Pressable, Text, View } from "react-native";
+import { colors } from "@/constants/colors"
+import { icons } from "@/constants/icons"
+import { formatDateTime } from "@/lib/utils/dateFormatters"
+import DateTimePicker from "@react-native-community/datetimepicker"
+import React, { useState } from "react"
+import { Image, Platform, Pressable, Text, View } from "react-native"
 
 interface DatePickerSectionProps {
-  scheduledDate: Date | null;
-  onDateChange: (date: Date) => void;
+  scheduledDate: Date | null
+  onDateChange: (date: Date) => void
 }
 
 const DatePickerSection: React.FC<DatePickerSectionProps> = ({
   scheduledDate,
   onDateChange,
 }) => {
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-  const [tempDate, setTempDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
+  const [tempDate, setTempDate] = useState<Date>(new Date())
 
   const handleDateChange = (event: any, selectDate?: Date) => {
     if (selectDate) {
-      setTempDate(selectDate);
+      setTempDate(selectDate)
     }
     // Only close if explicitly dismissed
     if (event.type === "dismissed") {
-      setShowDatePicker(false);
+      setShowDatePicker(false)
     }
-  };
+  }
 
   const handleConfirmDate = () => {
-    onDateChange(tempDate);
-    setShowDatePicker(false);
-  };
+    onDateChange(tempDate)
+    setShowDatePicker(false)
+  }
 
   const handleCancelDate = () => {
-    setTempDate(scheduledDate || new Date());
-    setShowDatePicker(false);
-  };
+    setTempDate(scheduledDate || new Date())
+    setShowDatePicker(false)
+  }
 
   return (
     <>
@@ -43,8 +43,8 @@ const DatePickerSection: React.FC<DatePickerSectionProps> = ({
         className="bg-primary mt-6 rounded-md justify-center px-4"
         style={{ minHeight: 60, paddingVertical: 12 }}
         onPress={() => {
-          setTempDate(scheduledDate || new Date());
-          setShowDatePicker(!showDatePicker);
+          setTempDate(scheduledDate || new Date())
+          setShowDatePicker(!showDatePicker)
         }}
       >
         <View className="flex-row justify-between items-center">
@@ -105,7 +105,7 @@ const DatePickerSection: React.FC<DatePickerSectionProps> = ({
         </View>
       )}
     </>
-  );
-};
+  )
+}
 
-export default DatePickerSection;
+export default DatePickerSection

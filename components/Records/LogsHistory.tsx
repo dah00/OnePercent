@@ -1,33 +1,69 @@
 import { colors } from "@/constants/colors"
 import { icons } from "@/constants/icons"
+import { MessageResponse } from "@/lib/api"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import React, { useState } from "react"
+import React from "react"
 import { Image, Pressable, Text, View } from "react-native"
+import Dropdown from "../Dropdown"
 
-const mockData = [
-  {
-    id: 1,
-    user_id: 1,
-    title: "Workout 2hrs",
-    message_type: "text",
-    created_at: "2025-02-03",
-    updated_at: null,
-    voice_file_path: null,
-  },
-  {
-    id: 2,
-    user_id: 1,
-    title: "Read 10 pages",
-    message_type: "voice",
-    created_at: "2025-03-04",
-    updated_at: null,
-    voice_file_path: null,
-  },
-]
+// Filter section only (card with date picker). Used inside Records FlatList header.
+export interface LogsHistoryFilterSectionProps {
+  afterDate: Date | null
+  onAfterDateChange: (date: Date | null) => void
+  typeFilter: "all" | "voice" | "text"
+  onTypeFilterChange: (filter: "all" | "voice" | "text") => void
+  /** When true, no card wrapper (use when inside another white container) */
+  inline?: boolean
+}
 
-const LogsHistory = () => {
-  const [afterDate, setAfterDate] = useState<Date | null>(new Date())
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
+export function LogsHistoryFilterSection({
+  typeFilter,
+  afterDate,
+  onAfterDateChange,
+  inline = false,
+}: LogsHistoryFilterSectionProps) {
+  const content = (
+    <View className="flex-row items-center">
+      <Text className="text-lg">Message Type: </Text>
+      <Pressable>
+        {/* <View className="p-2 rounded-[50%] bg-[#eeeeef]">
+          <Text className="text-lg">{typeFilter}</Text>
+        </View> */}
+        <Dropdown
+          placeholder={typeFilter}
+          options={[
+            { label: "All", value: "All" },
+            { label: "Text", value: "Text" },
+            { label: "Voice", value: "Voice" },
+          ]}
+        />
+      </Pressable>
+      <Text className="text-lg">After: </Text>
+      <Pressable
+        className="flex-row items-center"
+        style={{
+          borderColor: colors.background,
+          borderRadius: 10,
+        }}
+      >
+        <View style={{ transform: [{ scale: 1 }] }}>
+          <DateTimePicker
+            value={afterDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={(_, selectedDate) => {
+              onAfterDateChange(selectedDate ?? null)
+            }}
+          />
+        </View>
+      </Pressable>
+    </View>
+  )
+
+  if (inline) {
+    return <View className="p-4">{content}</View>
+  }
+
   return (
     <View
       className="bg-backgroundSecondary rounded-2xl p-4"
@@ -38,37 +74,35 @@ const LogsHistory = () => {
         shadowRadius: 24,
       }}
     >
-      {/* Filter section */}
-      <View className="flex-row justify-end items-center">
-        <Text>After: </Text>
-        <Pressable
-          onPress={() => setShowDatePicker(!showDatePicker)}
-          className="flex-row p-2 gap-2 items-center"
-          style={{
-            borderColor: colors.background,
-            borderRadius: 10,
-            backgroundColor: "#c7c7cc",
-          }}
-        >
-          <Image source={icons.calendar} className="h-4 w-4" />
-
-          {/* scale: 0.9 = smaller, 1.1 = larger (DateTimePicker has no fontSize prop) */}
-          <View style={{ transform: [{ scale: 0.9 }] }}>
-            <DateTimePicker
-              value={afterDate || new Date()}
-              mode="date"
-              display="default"
-            />
-          </View>
-          {showDatePicker ? (
-            <Image source={icons.arrow_up} className="h-6 w-6" />
-          ) : (
-            <Image source={icons.arrow_down} className="h-6 w-6" />
-          )}
-        </Pressable>
-      </View>
+      {content}
     </View>
   )
 }
 
-export default LogsHistory
+// Single log row. Used as FlatList renderItem.
+export interface LogsHistoryItemProps {
+  item: MessageResponse
+}
+
+export function LogsHistoryItem({ item }: LogsHistoryItemProps) {
+  return (
+    <View className="px-4 py-3">
+      <View className="flex-row items-center gap-4">
+        <View
+          className={`w-10 h-10 rounded-full ${item.message_type === "text" ? "bg-primary" : "bg-success"} items-center justify-center opacity-75`}
+        >
+          <Image
+            source={item.message_type === "text" ? icons.comment : icons.voice}
+            className="w-6 h-6"
+          />
+        </View>
+        <View>
+          <Text className="text-lg">{item.title}</Text>
+          <Text className="text-sm text-textSecondary">
+            {item.created_at.split("T")[0]}
+          </Text>
+        </View>
+      </View>
+    </View>
+  )
+}

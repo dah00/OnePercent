@@ -1,63 +1,81 @@
 import { colors } from "@/constants/colors";
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from "react-native";
 
 interface CheckboxProps {
   value: boolean;
-  onValueChange: (newValue: boolean) => void;
+  onValueChange: (value: boolean) => void;
   color?: string;
+  size?: number;
+  style?: ViewStyle;
   disabled?: boolean;
 }
 
-const Checkbox = ({
+export default function Checkbox({
   value,
   onValueChange,
   color = colors.primary,
+  size = 20,
+  style,
   disabled = false,
-}: CheckboxProps) => {
-  const handlePress = () => {
-    if (!disabled) {
-      onValueChange(!value);
-    }
-  };
+}: CheckboxProps) {
+  const boxStyle = [
+    styles.box,
+    {
+      width: size,
+      height: size,
+      borderRadius: size / 6,
+      borderWidth: 1,
+      borderColor: value ? color : colors.border,
+      backgroundColor: value ? color : colors.button,
+    },
+  ];
 
   return (
     <Pressable
-      onPress={handlePress}
-      disabled={disabled}
+      onPress={() => !disabled && onValueChange(!value)}
       style={({ pressed }) => [
         styles.container,
-        {
-          borderColor: value ? color : colors.background,
-          backgroundColor: value ? color : "transparent",
-          opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
-        },
+        pressed && !disabled && styles.pressed,
+        style,
       ]}
-      hitSlop={8}
+      disabled={disabled}
     >
-      {value && (
-        <View style={styles.checkmark}>
-          <Ionicons name="checkmark" size={16} color={colors.backgroundSecondary} />
-        </View>
-      )}
+      <View style={boxStyle}>
+        {value && (
+          <Text
+            style={[
+              styles.checkmark,
+              { color: colors.button, fontSize: size * 0.8 },
+            ]}
+          >
+            ✓
+          </Text>
+        )}
+      </View>
     </Pressable>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
+    alignSelf: "flex-start",
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  box: {
     alignItems: "center",
     justifyContent: "center",
   },
   checkmark: {
-    alignItems: "center",
-    justifyContent: "center",
+    fontWeight: "bold",
+    marginTop: -2,
   },
 });
-
-export default Checkbox;

@@ -12,21 +12,26 @@ export type DatePreset = "7days" | "30days" | "all";
 
 interface UseLogsHistoryOptions {
   typeFilter?: TypeFilter;
-  datePreset?: DatePreset;
+  afterDate?: Date | null;
   limit?: number;
 }
 
 // Convert date preset to ISO string (or undefined for "all")
-function getAfterDate(preset: DatePreset): string | undefined {
-  if (preset === "all") return undefined;
-  const now = new Date();
-  const days = preset === "7days" ? 7 : 30;
-  const after = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-  return after.toISOString();
+// function getAfterDate(preset: DatePreset): string | undefined {
+//   if (preset === "all") return undefined;
+//   const now = new Date();
+//   const days = preset === "7days" ? 7 : 30;
+//   const after = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+//   return after.toISOString();
+// }
+
+function toApiAfterDate(date: Date | null | undefined): string | undefined {
+  if (!date) return undefined;
+  return date.toISOString().split("T")[0];  // "2025-02-28"
 }
 
 export function useLogsHistory(options: UseLogsHistoryOptions = {}) {
-  const { typeFilter = "all", datePreset = "30days", limit = 25 } = options;
+  const { typeFilter = "all", afterDate, limit = 25 } = options;
 
   const [items, setItems] = useState<MessageResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +47,7 @@ export function useLogsHistory(options: UseLogsHistoryOptions = {}) {
 
     const params: MessagesHistoryParams = {
       type_filter: typeFilter,
-      after: getAfterDate(datePreset),
+      after: toApiAfterDate(afterDate),
       limit,
     };
 
@@ -63,7 +68,7 @@ export function useLogsHistory(options: UseLogsHistoryOptions = {}) {
     }
 
     setIsLoading(false);
-  }, [typeFilter, datePreset, limit]);
+  }, [typeFilter, afterDate, limit]);
 
   // Load next page (appends to items)
   const loadMore = useCallback(async () => {
@@ -73,7 +78,7 @@ export function useLogsHistory(options: UseLogsHistoryOptions = {}) {
 
     const params: MessagesHistoryParams = {
       type_filter: typeFilter,
-      after: getAfterDate(datePreset),
+      after: toApiAfterDate(afterDate),
       limit,
       cursor: nextCursor,
     };
@@ -93,7 +98,7 @@ export function useLogsHistory(options: UseLogsHistoryOptions = {}) {
     }
 
     setIsLoadingMore(false);
-  }, [hasMore, isLoadingMore, nextCursor, typeFilter, datePreset, limit]);
+  }, [hasMore, isLoadingMore, nextCursor, typeFilter, afterDate, limit]);
 
   // Reload when filters change
   useEffect(() => {

@@ -1,39 +1,127 @@
-import BarChartComponent from "@/components/Records/BarChartComponent";
-import LogsHistory from "@/components/Records/LogsHistory";
-import React from "react";
+import BarChartComponent from "@/components/Records/BarChartComponent"
 import {
-  Keyboard,
-  ScrollView,
+  LogsHistoryFilterSection,
+  LogsHistoryItem,
+} from "@/components/Records/LogsHistory"
+import { MessageResponse } from "@/lib/api"
+import { useLogsHistory } from "@/lib/hooks/useLogsHistory"
+import React, { useCallback, useState } from "react"
+import {
+  ActivityIndicator,
+  FlatList,
   Text,
-  TouchableWithoutFeedback,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { colors } from "@/constants/colors"
 
 const Records = () => {
-  return (
-    <SafeAreaView className="flex-1 bg-background " edges={[]}>
-      {/* Back Button */}
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View>
-          {/* Header */}
-          <View className="absolute z-10 h-32 w-[100%] justify-end bg-backgroundSecondary">
-            <Text className="text-3xl ml-6 mb-2">Records</Text>
-          </View>
+  const [afterDate, setAfterDate] = useState<Date | null>(new Date())
+  const [typeFilter, setTypeFilter] = useState<"all" | "voice" | "text">("all")
 
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            {/* Bar Chart */}
-            <View className="gap-4 px-6 mt-40">
-              <BarChartComponent />
-              {/* Logs History */}
-              <Text className="text-xl">Logs History</Text>
-              <LogsHistory />
-            </View>
-          </ScrollView>
+  const {
+    items,
+    isLoading,
+    isLoadingMore,
+    error,
+    loadMore,
+  } = useLogsHistory({ afterDate, typeFilter, limit: 25 })
+
+  const renderItem = useCallback(({ item }: { item: MessageResponse }) => (
+    <LogsHistoryItem item={item} />
+  ), [])
+
+  const listHeaderComponent = useCallback(
+    () => (
+      <LogsHistoryFilterSection
+        afterDate={afterDate}
+        onAfterDateChange={setAfterDate}
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        inline
+      />
+    ),
+    [afterDate, typeFilter],
+  )
+
+  const itemSeparatorComponent = useCallback(
+    () => (
+      <View
+        style={{
+          height: 1,
+          backgroundColor: colors.lightGrey,
+          marginHorizontal: 16,
+        }}
+      />
+    ),
+    [],
+  )
+
+  const listFooterComponent = useCallback(
+    () =>
+      isLoadingMore ? (
+        <View className="p-8 items-center">
+          <ActivityIndicator size="small" color={colors.primary} />
         </View>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
-  );
-};
+      ) : null,
+    [isLoadingMore],
+  )
 
-export default Records;
+  return (
+    <SafeAreaView className="flex-1 bg-background" edges={[]}>
+      <View className="flex-1">
+        {/* Header */}
+        <View className="absolute z-10 h-32 w-[100%] justify-end bg-backgroundSecondary">
+          <Text className="text-3xl ml-6 mb-2">Records</Text>
+        </View>
+
+        <View className="flex-1 px-6">
+          <View style={{ height: 160 }} />
+          <View className="gap-4">
+            <BarChartComponent />
+            <Text className="text-xl">Logs History</Text>
+          </View>
+          <View
+            className="flex-1 mt-4 rounded-2xl overflow-hidden"
+            style={{
+              backgroundColor: colors.backgroundSecondary,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 24,
+            }}
+          >
+            <FlatList
+              data={items}
+              keyExtractor={(item) => String(item.id)}
+              renderItem={renderItem}
+              ListHeaderComponent={listHeaderComponent}
+              ItemSeparatorComponent={itemSeparatorComponent}
+              onEndReached={loadMore}
+              onEndReachedThreshold={0.3}
+              ListFooterComponent={listFooterComponent}
+              contentContainerStyle={{ paddingBottom: 24 }}
+              ListEmptyComponent={
+            isLoading ? (
+              <View className="py-12 items-center">
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : error ? (
+              <View className="py-12 px-6">
+                <Text className="text-center text-textSecondary">{error}</Text>
+              </View>
+            ) : (
+              <View className="py-12 px-6">
+                <Text className="text-center text-textSecondary">No logs yet</Text>
+              </View>
+            )
+          }
+            />
+          </View>
+        </View>
+      </View>
+    </SafeAreaView>
+  )
+}
+
+export default Records

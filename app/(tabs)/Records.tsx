@@ -76,7 +76,7 @@ const Records = () => {
         </View>
 
         <View className="flex-1 px-6">
-          <View style={{ height: 160 }} />
+          <View style={{ height: 130 }} />
           <View className="gap-4">
             <BarChartComponent />
             <Text className="text-xl">Logs History</Text>

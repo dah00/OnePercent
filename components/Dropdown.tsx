@@ -1,26 +1,21 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Ionicons } from "@expo/vector-icons"
+import React, { useState } from "react"
+import { Pressable, Text, View } from "react-native"
 
 interface DropdownOption {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
 
 interface DropdownProps {
-  placeholder?: string;
-  label?: string;
-  options: DropdownOption[];
-  value?: string;
-  onValueChange?: (value: string) => void;
-  disabled?: boolean;
+  placeholder?: string
+  label?: string
+  options: DropdownOption[]
+  value?: string
+  onValueChange?: (value: string) => void
+  disabled?: boolean
+  /** Notify parent when open state changes (e.g. to adjust zIndex of siblings) */
+  onOpenChange?: (open: boolean) => void
 }
 
 const Dropdown = ({
@@ -30,23 +25,30 @@ const Dropdown = ({
   value,
   onValueChange,
   disabled = false,
+  onOpenChange,
 }: DropdownProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [internalValue, setInternalValue] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false)
+  const [internalValue, setInternalValue] = useState<string>("")
 
   // Use controlled value if provided, otherwise use internal state
-  const currentValue = value !== undefined ? value : internalValue;
-  const handleValueChange = onValueChange || setInternalValue;
+  const currentValue = value !== undefined ? value : internalValue
+  const handleValueChange = onValueChange || setInternalValue
 
-  const selectedOption = options.find(
-    (option) => option.value === currentValue
-  );
-  const displayText = selectedOption ? selectedOption.label : placeholder;
+  const selectedOption = options.find((option) => option.value === currentValue)
+  const displayText = selectedOption ? selectedOption.label : placeholder
+
+  const handleToggle = () => {
+    if (disabled) return
+    const next = !isOpen
+    setIsOpen(next)
+    onOpenChange?.(next)
+  }
 
   const handleSelect = (selectedValue: string) => {
-    handleValueChange(selectedValue);
-    setIsOpen(false);
-  };
+    handleValueChange(selectedValue)
+    setIsOpen(false)
+    onOpenChange?.(false)
+  }
 
   return (
     <View>
@@ -54,17 +56,11 @@ const Dropdown = ({
         <Text className="text-sm font-medium mb-2 text-gray-700">{label}</Text>
       )}
       <Pressable
-        onPress={() => !disabled && setIsOpen(true)}
+        onPress={handleToggle}
         disabled={disabled}
-        className="bg-gray-200 rounded-lg px-4 py-5 flex-row items-center justify-between"
+        className="bg-[#ebeaec] rounded-full px-4 py-1 flex-row gap-2 items-center justify-between"
       >
-        <Text
-          className={`flex-1 ${
-            selectedOption ? "text-gray-900" : "text-gray-400"
-          }`}
-        >
-          {displayText}
-        </Text>
+        <Text className="text-lg">{displayText}</Text>
         <Ionicons
           name={isOpen ? "chevron-up" : "chevron-down"}
           size={20}
@@ -72,56 +68,31 @@ const Dropdown = ({
         />
       </Pressable>
 
-      <Modal
-        visible={isOpen}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsOpen(false)}
-      >
-        <Pressable
-          className="flex-1 bg-black/50 justify-center px-4"
-          onPress={() => setIsOpen(false)}
+      {isOpen && (
+        <View
+          className="absolute z-10 top-8 left-0 right-0 rounded-xl py-2 px-5 justify-center gap-2"
+          style={{
+            backgroundColor: "#ebeaec",
+            elevation: 8,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+          }}
         >
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg max-h-96"
-          >
-            <View className="p-4 border-b border-gray-200">
-              <Text className="text-lg font-semibold">
-                {label || placeholder}
-              </Text>
-            </View>
-            <ScrollView className="max-h-80">
-              {options.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  onPress={() => handleSelect(option.value)}
-                  className={`px-4 py-4 border-b border-gray-100 ${
-                    currentValue === option.value ? "bg-accent/10" : ""
-                  }`}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text
-                      className={`${
-                        currentValue === option.value
-                          ? "font-semibold text-accent"
-                          : "text-gray-900"
-                      }`}
-                    >
-                      {option.label}
-                    </Text>
-                    {currentValue === option.value && (
-                      <Ionicons name="checkmark" size={20} color="#2563EB" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          {options.map((option) => (
+            <Pressable
+              key={option.value}
+              onPress={() => handleSelect(option.value)}
+              className="py-1"
+            >
+              <Text className="text-lg">{option.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
     </View>
-  );
-};
+  )
+}
 
-export default Dropdown;
+export default Dropdown

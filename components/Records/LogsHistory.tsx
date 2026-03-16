@@ -2,7 +2,7 @@ import { colors } from "@/constants/colors"
 import { icons } from "@/constants/icons"
 import { MessageResponse } from "@/lib/api"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import React from "react"
+import React, { useState } from "react"
 import { Image, Pressable, Text, View } from "react-native"
 import Dropdown from "../Dropdown"
 
@@ -22,41 +22,49 @@ export function LogsHistoryFilterSection({
   onAfterDateChange,
   inline = false,
 }: LogsHistoryFilterSectionProps) {
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState<boolean>(false)
+
   const content = (
-    <View className="flex-row items-center">
-      <Text className="text-lg">Message Type: </Text>
-      <Pressable>
-        {/* <View className="p-2 rounded-[50%] bg-[#eeeeef]">
-          <Text className="text-lg">{typeFilter}</Text>
-        </View> */}
-        <Dropdown
-          placeholder={typeFilter}
-          options={[
-            { label: "All", value: "All" },
-            { label: "Text", value: "Text" },
-            { label: "Voice", value: "Voice" },
-          ]}
-        />
-      </Pressable>
-      <Text className="text-lg">After: </Text>
-      <Pressable
+    <View className="flex-column items-end gap-2">
+      <View
         className="flex-row items-center"
-        style={{
-          borderColor: colors.background,
-          borderRadius: 10,
-        }}
+        style={{ zIndex: isTypeDropdownOpen ? 10 : undefined }}
       >
-        <View style={{ transform: [{ scale: 1 }] }}>
-          <DateTimePicker
-            value={afterDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={(_, selectedDate) => {
-              onAfterDateChange(selectedDate ?? null)
-            }}
+        <Text className="text-lg">Message Type: </Text>
+        <Pressable style={{ zIndex: isTypeDropdownOpen ? 10 : undefined }}>
+          <Dropdown
+            placeholder={typeFilter}
+            options={[
+              { label: "All", value: "All" },
+              { label: "Text", value: "Text" },
+              { label: "Voice", value: "Voice" },
+            ]}
+            onOpenChange={setIsTypeDropdownOpen}
           />
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
+
+      <View className="flex-row items-center">
+        <Text className="text-lg">After: </Text>
+        <Pressable
+          className="flex-row items-center"
+          style={{
+            borderColor: colors.background,
+            borderRadius: 10,
+          }}
+        >
+          <View style={{ transform: [{ scale: 0.9 }], padding: 0, margin: 0}}>
+            <DateTimePicker
+              value={afterDate || new Date()}
+              mode="date"
+              display="default"
+              onChange={(_, selectedDate) => {
+                onAfterDateChange(selectedDate ?? null)
+              }}
+            />
+          </View>
+        </Pressable>
+      </View>
     </View>
   )
 

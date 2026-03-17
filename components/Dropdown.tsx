@@ -70,7 +70,7 @@ const Dropdown = ({
 
       {isOpen && (
         <View
-          className="absolute z-10 top-8 left-0 right-0 rounded-xl py-2 px-5 justify-center gap-2"
+          className="absolute z-10 top-8  rounded-xl py-2 px-4 items-center gap-2"
           style={{
             backgroundColor: "#ebeaec",
             elevation: 8,

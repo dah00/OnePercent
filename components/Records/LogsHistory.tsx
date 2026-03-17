@@ -53,7 +53,7 @@ export function LogsHistoryFilterSection({
             borderRadius: 10,
           }}
         >
-          <View style={{ transform: [{ scale: 0.9 }], padding: 0, margin: 0}}>
+          <View style={{ transform: [{ scale: 0.9 }], padding: 0, margin: 0 }}>
             <DateTimePicker
               value={afterDate || new Date()}
               mode="date"

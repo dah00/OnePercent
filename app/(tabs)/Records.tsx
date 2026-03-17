@@ -3,43 +3,54 @@ import {
   LogsHistoryFilterSection,
   LogsHistoryItem,
 } from "@/components/Records/LogsHistory"
+import { colors } from "@/constants/colors"
 import { MessageResponse } from "@/lib/api"
 import { useLogsHistory } from "@/lib/hooks/useLogsHistory"
 import React, { useCallback, useState } from "react"
-import {
-  ActivityIndicator,
-  FlatList,
-  Text,
-  View,
-} from "react-native"
+import { ActivityIndicator, FlatList, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { colors } from "@/constants/colors"
 
 const Records = () => {
   const [afterDate, setAfterDate] = useState<Date | null>(new Date())
   const [typeFilter, setTypeFilter] = useState<"all" | "voice" | "text">("all")
 
-  const {
-    items,
-    isLoading,
-    isLoadingMore,
-    error,
-    loadMore,
-  } = useLogsHistory({ afterDate, typeFilter, limit: 25 })
+  const { items, isLoading, isLoadingMore, error, loadMore } = useLogsHistory({
+    afterDate,
+    typeFilter,
+    limit: 25,
+  })
 
-  const renderItem = useCallback(({ item }: { item: MessageResponse }) => (
-    <LogsHistoryItem item={item} />
-  ), [])
+  const renderItem = useCallback(
+    ({ item }: { item: MessageResponse }) => <LogsHistoryItem item={item} />,
+    [],
+  )
 
   const listHeaderComponent = useCallback(
     () => (
-      <LogsHistoryFilterSection
-        afterDate={afterDate}
-        onAfterDateChange={setAfterDate}
-        typeFilter={typeFilter}
-        onTypeFilterChange={setTypeFilter}
-        inline
-      />
+      <>
+        <View
+          style={{
+            height: 120,
+            backgroundColor: colors.background,
+          }}
+        />
+        <View className="gap-2" style={{ backgroundColor: colors.background }}>
+          <BarChartComponent />
+          <Text className="text-xl my-2">Logs History</Text>
+        </View>
+        <View
+          className="mt-0 bg-backgroundSecondary"
+          style={{ borderTopEndRadius: 16, borderTopLeftRadius: 16 }}
+        >
+          <LogsHistoryFilterSection
+            afterDate={afterDate}
+            onAfterDateChange={setAfterDate}
+            typeFilter={typeFilter}
+            onTypeFilterChange={setTypeFilter}
+            inline
+          />
+        </View>
+      </>
     ),
     [afterDate, typeFilter],
   )
@@ -76,14 +87,12 @@ const Records = () => {
         </View>
 
         <View className="flex-1 px-6">
-          <View style={{ height: 130 }} />
-          <View className="gap-4">
-            <BarChartComponent />
-            <Text className="text-xl">Logs History</Text>
-          </View>
           <View
-            className="flex-1 mt-4 rounded-2xl overflow-hidden"
+            className="flex-1 mt-4"
+            collapsable={false}
             style={{
+              borderRadius: 16,
+              overflow: "hidden",
               backgroundColor: colors.backgroundSecondary,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -100,22 +109,32 @@ const Records = () => {
               onEndReached={loadMore}
               onEndReachedThreshold={0.3}
               ListFooterComponent={listFooterComponent}
+              style={{
+                flex: 1,
+                overflow: "hidden",
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+              }}
               contentContainerStyle={{ paddingBottom: 24 }}
               ListEmptyComponent={
-            isLoading ? (
-              <View className="py-12 items-center">
-                <ActivityIndicator size="small" color={colors.primary} />
-              </View>
-            ) : error ? (
-              <View className="py-12 px-6">
-                <Text className="text-center text-textSecondary">{error}</Text>
-              </View>
-            ) : (
-              <View className="py-12 px-6">
-                <Text className="text-center text-textSecondary">No logs yet</Text>
-              </View>
-            )
-          }
+                isLoading ? (
+                  <View className="py-12 items-center">
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  </View>
+                ) : error ? (
+                  <View className="py-12 px-6">
+                    <Text className="text-center text-textSecondary">
+                      {error}
+                    </Text>
+                  </View>
+                ) : (
+                  <View className="py-12 px-6">
+                    <Text className="text-center text-textSecondary">
+                      No logs yet
+                    </Text>
+                  </View>
+                )
+              }
             />
           </View>
         </View>

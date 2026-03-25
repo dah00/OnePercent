@@ -32,7 +32,7 @@ const Streak = ({ messageList }: { messageList: MessageResponse[] }) => {
             item.logged ? "bg-primary" : "bg-border"
           } rounded-full`}
         />
-        <Text className="text-sm mt-2">{dayStr}</Text>
+        <Text className="text-md mt-2">{dayStr}</Text>
       </View>
     );
   };
@@ -69,9 +69,15 @@ const Streak = ({ messageList }: { messageList: MessageResponse[] }) => {
   }, [messageList]);
 
   return (
-    <View>
-      <Text className="color-darkGrey text-xl">{`${logCount} out of 7 streak in the past 7 days`}</Text>
-      <View className="px-6 gap-2 items-center justify-between">
+    <View className="bg-backgroundSecondary rounded-2xl py-2 px-4"
+    style={{
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 24,
+    }}>
+      <Text className="color-darkGrey text-lg">{`${logCount} out of 7 streak in the past 7 days`}</Text>
+      <View className="px-2 gap-2 items-center justify-between">
         <FlatList
           data={pastSevenDayStreak}
           keyExtractor={(item) => item.day}

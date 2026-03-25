@@ -34,11 +34,25 @@ const BAR_COLORS = {
   audio: colors.success,
 } as const
 
-const INNER_LABEL_STYLE = {
-  fontSize: 15,
+const INNER_LABEL_BASE_STYLE = {
   fontWeight: "600" as const,
   color: colors.backgroundSecondary,
   alignSelf: "center" as const,
+  textAlign: "center" as const,
+}
+
+function getInnerLabelStyle(value: number) {
+  // Low values create very small stacked segments; start smaller and allow
+  // enough size for readability. For the tiniest segments (e.g. value=1),
+  // we avoid too-aggressive shrinking and nudge the label upward a bit.
+  const fontSize = value <= 1 ? 11 : value <= 3 ? 11 : value <= 6 ? 12 : 15
+  const translateY = value <= 1 ? -2 : value <= 3 ? -1 : 0
+  return {
+    ...INNER_LABEL_BASE_STYLE,
+    fontSize,
+    lineHeight: Math.round(fontSize * 1.05),
+    transform: [{ translateY }],
+  }
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -66,7 +80,14 @@ function buildSegment(
     color,
     innerBarComponent:
       showLabel && value > 0
-        ? () => <Text style={INNER_LABEL_STYLE}>{value}</Text>
+        ? () => (
+            <Text
+              style={getInnerLabelStyle(value)}
+              numberOfLines={1}
+            >
+              {value}
+            </Text>
+          )
         : undefined,
   }
 }

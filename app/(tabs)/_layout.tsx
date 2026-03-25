@@ -73,7 +73,7 @@ const TabsLayoutContent = () => {
             height: "100%",
           },
           tabBarStyle: {
-            backgroundColor: colors.textPrimary,
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
             width: "92%",
             height: 75,
             bottom: 18,
@@ -84,7 +84,8 @@ const TabsLayoutContent = () => {
             paddingHorizontal: 12,
             position: "relative",
             borderTopWidth: 0,
-            borderWidth: 0,
+            borderWidth: 1,
+            borderColor: colors.border,
             justifyContent: "space-around",
           },
         }}

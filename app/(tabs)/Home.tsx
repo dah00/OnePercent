@@ -1,4 +1,5 @@
 import EntryFloatingActionButton from "@/components/components/EntryFloatingActionButton"
+import DailyInspirationCard from "@/components/Home/DailyInspirationCard"
 import Streak from "@/components/Home/Streak"
 import { colors } from "@/constants/colors"
 import { icons } from "@/constants/icons"
@@ -6,6 +7,7 @@ import { useAuth } from "@/lib/AuthContext"
 import { useEntryOverlay } from "@/lib/contexts/EntryOverlayContext"
 import { useMessages } from "@/lib/hooks/useMessages"
 import { router } from "expo-router"
+import { BlurView } from "expo-blur"
 import React, { useState } from "react"
 import {
   Image,
@@ -15,6 +17,7 @@ import {
   Pressable,
   Text,
   TouchableWithoutFeedback,
+  StyleSheet,
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -37,10 +40,8 @@ const Home = () => {
   const { user } = useAuth()
   const firstName = getFirstName(user?.full_name)
 
-  // TODO: Fix issue: log doesn't shows immediately on the streak right after entry. Same issue in the recording
-
   return (
-    <SafeAreaView className="flex-1 bg-secondary " edges={[]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* Back Button */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
@@ -48,18 +49,46 @@ const Home = () => {
           className="flex-1"
         >
           {/** Header */}
-          <View className="mb-10 bg-darkGrey h-56 rounded-b-[38px]">
-            <View className="flex-row justify-between px-6 pt-32 h-full">
-              <Text className="color-backgroundSecondary font-instrument text-4xl">
-                Hello <Text className="color-primary">{firstName}</Text>
-              </Text>
+          <View
+            className="mb-6 h-24 rounded-b-[30px] overflow-hidden"
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.75)",
+              borderBottomColor: colors.border,
+              borderBottomWidth: 1,
+            }}
+          >
+            {/* iOS-like translucent header background */}
+            <BlurView
+              intensity={70}
+              tint="light"
+              style={StyleSheet.absoluteFillObject}
+            />
+            {/* Small overlay to keep text readable over arbitrary backgrounds */}
+            <View
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                backgroundColor: "rgba(255, 255, 255, 0.35)",
+              }}
+            />
+
+            <View className="flex-row justify-between px-6 pt-4 h-full">
+              <View>
+                <Text className="font-instrument text-2xl" style={{ color: colors.textPrimary }}>
+                  Hello{" "}
+                  <Text style={{ color: colors.primary }}>{firstName}</Text>
+                </Text>
+                <Text className="text-sm mt-1" style={{ color: colors.textSecondary }}>
+                  What made you 1% better today?
+                </Text>
+              </View>
+
               <Pressable onPress={() => router.push("/Profile")}>
                 <Image
                   source={icons.profile}
                   style={{
                     width: 26,
                     height: 26,
-                    tintColor: colors.backgroundSecondary,
+                    tintColor: colors.textPrimary,
                   }}
                 />
               </Pressable>
@@ -112,10 +141,12 @@ const Home = () => {
           )}
 
           {/** Streak indicator */}
-          {/* {console.log("Messages: ", messages)} */}
           <View className="mt-8 px-6 gap-2">
             <View className="flex-row justify-between items-center">
-              <Text className="font-semibold text-2xl">Past 7 days Streak</Text>
+              <View className="flex-row gap-2 items-center">
+                <Image source={icons.fire} className="w-6 h-6" />
+                <Text className="text-2xl">Past 7 days Streak</Text>
+              </View>
               <Pressable onPress={() => router.replace("/Records")}>
                 <Text className="text-primary font-semibold text-lg">
                   View All{" "}
@@ -123,33 +154,16 @@ const Home = () => {
               </Pressable>
             </View>
             <Streak messageList={messages} />
+
+            <View className="flex-row items-center mt-4 gap-2">
+              <Image source={icons.lamp} className="w-6 h-6" />
+              <Text className="text-2xl">Today&apos;s idea</Text>
+            </View>
+            <DailyInspirationCard
+              recentMessages={messages}
+              onStartEntry={() => setShowEntryOption(true)}
+            />
           </View>
-
-          {/* Messages list (optional - uncomment to show) */}
-          {/* <View className="mt-6 mb-10 px-6">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-2xl">My entries</Text>
-              <Pressable onPress={reload}>
-                <Text className="text-accent text-sm">Refresh</Text>
-              </Pressable>
-            </View>
-
-            <View className="bg-primary rounded-lg mt-4">
-              {isLoading ? (
-                <View className="p-4">
-                  <Text>Loading messages…</Text>
-                </View>
-              ) : error ? (
-                <View className="p-4">
-                  <Text className="text-red-500">
-                    {typeof error === "string" ? error : JSON.stringify(error)}
-                  </Text>
-                </View>
-              ) : (
-                <MessageList messages={messages} />
-              )}
-            </View>
-          </View> */}
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </SafeAreaView>

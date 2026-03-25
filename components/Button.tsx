@@ -1,14 +1,14 @@
-import { colors } from "@/constants/colors";
-import React from "react";
-import { ActivityIndicator, Image, Pressable, Text } from "react-native";
+import { colors } from "@/constants/colors"
+import React from "react"
+import { ActivityIndicator, Pressable, Text } from "react-native"
 
 interface ButtonProps {
-  onPress: () => void;
-  isLoading?: boolean;
-  disabled?: boolean;
-  variant?: "primary" | "secondary" | "danger";
-  size?: "sm" | "md" | "lg";
-  text: string;
+  onPress: () => void
+  isLoading?: boolean
+  disabled?: boolean
+  variant?: "primary" | "secondary" | "danger"
+  size?: "sm" | "md" | "lg"
+  text: string
 }
 
 const Button = ({
@@ -22,23 +22,23 @@ const Button = ({
   const getSizeStyles = () => {
     switch (size) {
       case "sm":
-        return "py-2 px-4";
+        return "py-2 px-4"
       case "md":
-        return "py-4 px-6";
+        return "py-4 px-6"
       case "lg":
-        return "py-5 px-8";
+        return "py-5 px-8"
       default:
-        return "py-4 px-6";
+        return "py-4 px-6"
     }
-  };
+  }
 
-  const isDisabled = disabled || isLoading;
+  const isDisabled = disabled || isLoading
 
   const handlePress = () => {
     if (!isDisabled) {
-      onPress();
+      onPress()
     }
-  };
+  }
 
   return (
     <Pressable
@@ -48,9 +48,11 @@ const Button = ({
       style={{ opacity: isDisabled ? 0.5 : 1 }}
     >
       <Text className="text-white text-xl">{text}</Text>
-      {isLoading && <ActivityIndicator size="small" color={colors.background} />}
+      {isLoading && (
+        <ActivityIndicator size="small" color={colors.background} />
+      )}
     </Pressable>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button

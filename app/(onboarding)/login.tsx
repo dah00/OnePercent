@@ -1,8 +1,8 @@
-import Button from "@/components/Button";
-import TextField from "@/components/TextField";
-import { useAuth } from "@/lib/AuthContext";
-import { Link, router } from "expo-router";
-import React, { useState } from "react";
+import Button from "@/components/Button"
+import TextField from "@/components/TextField"
+import { useAuth } from "@/lib/AuthContext"
+import { Link, router } from "expo-router"
+import React, { useState } from "react"
 import {
   Alert,
   Keyboard,
@@ -11,43 +11,43 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const Login = () => {
-  const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showErrors, setShowErrors] = useState(false);
+  const { login } = useAuth()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [showErrors, setShowErrors] = useState(false)
 
   const handleLogIn = async () => {
     // Trim whitespace and validate
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
+    const trimmedEmail = email.trim()
+    const trimmedPassword = password.trim()
 
     if (!trimmedEmail || !trimmedPassword) {
-      setShowErrors(true);
-      return;
+      setShowErrors(true)
+      return
     }
 
-    setShowErrors(false);
-    setIsLoading(true);
+    setShowErrors(false)
+    setIsLoading(true)
 
     try {
-      await login(trimmedEmail, trimmedPassword);
+      await login(trimmedEmail, trimmedPassword)
 
       // Navigate immediately - success alert is optional
-      router.replace("/");
+      router.replace("/")
     } catch (error) {
       Alert.alert(
         "Login Failed",
         error instanceof Error ? error.message : "Something went wrong",
-      );
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <SafeAreaView className="flex-1 ">
@@ -67,7 +67,7 @@ const Login = () => {
               placeholder="Email Address"
               value={email}
               onChangeText={(text) => {
-                setEmail(text);
+                setEmail(text)
               }}
               autoCapitalize="none"
               autoComplete="email"
@@ -79,7 +79,7 @@ const Login = () => {
               placeholder="Password"
               value={password}
               onChangeText={(text) => {
-                setPassword(text);
+                setPassword(text)
               }}
               autoCapitalize="none"
               autoComplete="password"
@@ -117,7 +117,7 @@ const Login = () => {
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

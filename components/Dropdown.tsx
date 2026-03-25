@@ -1,3 +1,4 @@
+import { colors } from "@/constants/colors"
 import { Ionicons } from "@expo/vector-icons"
 import React, { useState } from "react"
 import { Pressable, Text, View } from "react-native"
@@ -58,9 +59,14 @@ const Dropdown = ({
       <Pressable
         onPress={handleToggle}
         disabled={disabled}
-        className="bg-[#ebeaec] rounded-full px-4 py-1 flex-row gap-2 items-center justify-between"
+        className="flex-row items-center min-h-8 justify-center px-4 gap-2"
+          style={{
+            borderColor: colors.border,
+            borderWidth: 1,
+            borderRadius: 10,
+          }}
       >
-        <Text className="text-lg">{displayText}</Text>
+        <Text className="text-lg text-textSecondary">{displayText}</Text>
         <Ionicons
           name={isOpen ? "chevron-up" : "chevron-down"}
           size={20}

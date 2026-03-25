@@ -11,7 +11,7 @@ import { ActivityIndicator, FlatList, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 const Records = () => {
-  const [afterDate, setAfterDate] = useState<Date | null>(new Date())
+  const [afterDate, setAfterDate] = useState<Date | null>(null)
   const [typeFilter, setTypeFilter] = useState<"all" | "voice" | "text">("all")
 
   const { items, isLoading, isLoadingMore, error, loadMore } = useLogsHistory({

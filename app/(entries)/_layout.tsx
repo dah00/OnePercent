@@ -1,9 +1,9 @@
-import BackButton from "@/components/BackButton";
-import SaveModal from "@/components/components/SaveModal";
-import { SaveEntryProvider } from "@/lib/contexts/SaveEntryContext";
+import BackButton from "@/components/BackButton"
+import SaveModal from "@/components/components/SaveModal"
+import { SaveEntryProvider } from "@/lib/contexts/SaveEntryContext"
 
-import { Slot } from "expo-router";
-import React, { useState } from "react";
+import { Slot } from "expo-router"
+import React, { useState } from "react"
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -12,11 +12,11 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const EntriesLayout = () => {
-  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
+  const [showSaveModal, setShowSaveModal] = useState<boolean>(false)
 
   return (
     <SaveEntryProvider>
@@ -44,7 +44,7 @@ const EntriesLayout = () => {
               <Pressable
                 className="px-6 py-3 rounded-full bg-primary items-center justify-center"
                 onPress={() => {
-                  setShowSaveModal(true);
+                  setShowSaveModal(true)
                 }}
               >
                 <Text className="text-white font-bold text-lg">Done</Text>
@@ -72,7 +72,7 @@ const EntriesLayout = () => {
         </TouchableWithoutFeedback>
       </SafeAreaView>
     </SaveEntryProvider>
-  );
-};
+  )
+}
 
-export default EntriesLayout;
+export default EntriesLayout

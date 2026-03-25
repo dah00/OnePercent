@@ -1,12 +1,12 @@
-import EntryFloatingActionButton from "@/components/components/EntryFloatingActionButton";
-import Streak from "@/components/Home/Streak";
-import { colors } from "@/constants/colors";
-import { icons } from "@/constants/icons";
-import { useAuth } from "@/lib/AuthContext";
-import { useEntryOverlay } from "@/lib/contexts/EntryOverlayContext";
-import { useMessages } from "@/lib/hooks/useMessages";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import EntryFloatingActionButton from "@/components/components/EntryFloatingActionButton"
+import Streak from "@/components/Home/Streak"
+import { colors } from "@/constants/colors"
+import { icons } from "@/constants/icons"
+import { useAuth } from "@/lib/AuthContext"
+import { useEntryOverlay } from "@/lib/contexts/EntryOverlayContext"
+import { useMessages } from "@/lib/hooks/useMessages"
+import { router } from "expo-router"
+import React, { useState } from "react"
 import {
   Image,
   Keyboard,
@@ -16,26 +16,26 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 function getFirstName(fullName?: string) {
-  const trimmed = fullName?.trim();
+  const trimmed = fullName?.trim()
   if (trimmed) {
-    const firstName = trimmed.split(/\s+/)[0];
+    const firstName = trimmed.split(/\s+/)[0]
     if (firstName) {
-      return firstName[0].toUpperCase() + firstName.slice(1).toLowerCase();
+      return firstName[0].toUpperCase() + firstName.slice(1).toLowerCase()
     }
   }
-  return "there";
+  return "there"
 }
 
 const Home = () => {
-  const [backendMessage, setBackendMessage] = useState<string>("");
-  const { showEntryOption, setShowEntryOption } = useEntryOverlay();
-  const { messages, isLoading, error, reload, createMessage } = useMessages();
-  const { user } = useAuth();
-  const firstName = getFirstName(user?.full_name);
+  const [backendMessage, setBackendMessage] = useState<string>("")
+  const { showEntryOption, setShowEntryOption } = useEntryOverlay()
+  const { messages, isLoading, error, reload, createMessage } = useMessages()
+  const { user } = useAuth()
+  const firstName = getFirstName(user?.full_name)
 
   // TODO: Fix issue: log doesn't shows immediately on the streak right after entry. Same issue in the recording
 
@@ -153,7 +153,7 @@ const Home = () => {
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
